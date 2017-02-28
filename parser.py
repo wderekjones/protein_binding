@@ -15,6 +15,8 @@ path1 = "SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5"
 
 path2 = "SampleInputs/1QCF_docking_results"
 
+path3 = "SampleInputs/1QCF_cluster1_CHEMBL568101.1.dat"
+
 
 
 def load_molecular_descriptors(filepath):
@@ -34,6 +36,38 @@ def load_docking_results(filepath):
 	return data
 
 
+def load_dat(filepath):
+    file = open(filepath)
+
+    feature_list = []
+
+
+    for line in file.readlines():
+        if line.find("TOTAL") != -1 and line.find("DELTA") == -1:
+            line = line.strip('\n')
+            line = line.split(" ")
+            line = filter(lambda x: len(x) >0,line)
+            #print line
+            value = float(line[1])
+            f_list = (line[0],value)
+
+            feature_list.append(f_list)
+        elif line.find("TOTAL") != -1 and line.find("DELTA") != -1:
+            line = line.strip('\n')
+            line = line.split(" ")
+            line = filter(lambda x: len(x) > 0, line)
+            col_name = line[0]+line[1]
+            value = float(line[2])
+            f_list = (col_name,value)
+
+            feature_list.append(f_list)
+
+    #print feature_list
+
+    df = pd.DataFrame.from_items(feature_list,columns=['TOTAL','TOTALDELTA'])
+
+    print df
+
 '''
 
 	take as input a number of data frames and an identifier. Create a new dataframe from each input dataframe (list of dataframes?) which contains each column for the 
@@ -52,6 +86,6 @@ data1 = load_mmgbsa_energy(path1)
 data2 = load_docking_results(path2)
 
 
-
+data3 = load_dat(path3)
 
 
