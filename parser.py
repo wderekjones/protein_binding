@@ -18,6 +18,7 @@ path2 = "SampleInputs/1QCF_docking_results"
 path3 = "SampleInputs/1QCF_cluster1_CHEMBL568101.1.dat"
 
 
+# create a function for reading each input file type
 
 def load_molecular_descriptors(filepath):
 
@@ -39,8 +40,10 @@ def load_docking_results(filepath):
 def load_dat(filepath):
     file = open(filepath)
 
-    feature_list = []
+    feature_list = {}
 
+    i = 0
+    j = 0
 
     for line in file.readlines():
         if line.find("TOTAL") != -1 and line.find("DELTA") == -1:
@@ -49,24 +52,25 @@ def load_dat(filepath):
             line = filter(lambda x: len(x) >0,line)
             #print line
             value = float(line[1])
-            f_list = (line[0],value)
-
-            feature_list.append(f_list)
+            line[0] = line[0]+str(i)
+            col_name = line[0]
+            feature_list[col_name] = value
+            i +=1
         elif line.find("TOTAL") != -1 and line.find("DELTA") != -1:
             line = line.strip('\n')
             line = line.split(" ")
             line = filter(lambda x: len(x) > 0, line)
+            line[1] = line[1]+str(j)
             col_name = line[0]+line[1]
             value = float(line[2])
             f_list = (col_name,value)
 
-            feature_list.append(f_list)
+            feature_list[col_name] = value
+            j+=1
 
-    #print feature_list
 
-    df = pd.DataFrame.from_items(feature_list,columns=['TOTAL','TOTALDELTA'])
-
-    print df
+    df = pd.DataFrame([feature_list])
+    return df
 
 '''
 
@@ -78,14 +82,20 @@ def merge_results_on_id():
 
 '''
 
-data0 = load_molecular_descriptors(path0)
+# test the functions
 
+# load the e-dragon features
+data0 = load_molecular_descriptors(path0)
+print data0
 
 data1 = load_mmgbsa_energy(path1)
+print data1
+
 
 data2 = load_docking_results(path2)
-
+print data2
 
 data3 = load_dat(path3)
+print data3
 
 
