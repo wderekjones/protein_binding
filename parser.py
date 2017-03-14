@@ -1,11 +1,5 @@
 import pandas as pd
 
-import re
-
-'''
-    Loading the files in order to determine best utilities. Future improvements will aggregate descriptors for a particular ID and
-    output a file ready for training machine learning models.
-'''
 
 path0 = "SampleInputs/MolecularDescriptors/E-DragonOutput7MolecularDescriptors"
 
@@ -20,20 +14,23 @@ path3 = "SampleInputs/1QCF_cluster1_CHEMBL568101.1.dat"
 
 def load_molecular_descriptors(filepath):
 
-	data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
+    data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
 
 
-	return data
+    return data
 
 
 def load_mmgbsa_energy(filepath):
-	data = pd.read_csv(filepath,delimiter='\t')
-
-	return data
+    data = pd.read_csv(filepath,delimiter='\t')
+    print data.columns.values
+    data.drop('Order',axis=1,inplace=True)
+    return data
 
 def load_docking_results(filepath):
-	data = pd.read_csv(filepath,delimiter='\t')
-	return data
+    data = pd.read_csv(filepath,delimiter='\t')
+    print data.columns.values
+    data.drop('Order',axis=1,inplace=True)
+    return data
 
 
 def load_dat(filepath):
@@ -49,7 +46,6 @@ def load_dat(filepath):
             line = line.strip('\n')
             line = line.split(" ")
             line = filter(lambda x: len(x) >0,line)
-            #print line
             value = float(line[1])
             line[0] = line[0]+str(i)
             col_name = line[0]
@@ -85,20 +81,12 @@ def get_merged_results(dfX,dfY,key):
     '''
 
     merge_result = dfX.merge(dfY,left_on=key, right_on=key)
-    merge_result_index = merge_result.columns.values
 
-
-
-    merge_result_values = merge_result.values
-
-    # TODO: for each colname in merge_result, drop each column of the form Order*
-    # TODO: switch the order of the id column to the first column. Drop then append?
-
-    print merge_result_index
-    #print merge_result_values
-
+    merge_result = merge_result.set_index(key).reset_index()
 
     return merge_result
+
+
 
 # test the functions
 
