@@ -1,8 +1,6 @@
 import pandas as pd
 
-import numpy as np
-
-import os
+import re
 
 '''
     Loading the files in order to determine best utilities. Future improvements will aggregate descriptors for a particular ID and
@@ -23,6 +21,7 @@ path3 = "SampleInputs/1QCF_cluster1_CHEMBL568101.1.dat"
 def load_molecular_descriptors(filepath):
 
 	data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
+
 
 	return data
 
@@ -72,30 +71,42 @@ def load_dat(filepath):
     df = pd.DataFrame([feature_list])
     return df
 
-'''
 
-	take as input a number of data frames and an identifier. Create a new dataframe from each input dataframe (list of dataframes?) which contains each column for the 
-	identifier. return as numpy array.
 
-def merge_results_on_id():
-	
+def get_merged_results(dfX,dfY,key):
+    '''
 
-'''
+    Wraps the pandas call to merge.
+
+    :param dfX: one of the two dataframes to be merged
+    :param dfY: the other of the two dataframes to be merged
+    :param key: a string denoting the column on which the dataframes will be merged
+    :return: a pandas dataframe containing the matches between the two dataframes (maximum = least row dimenison of dfX or dfY)
+    '''
+
+    merge_result = dfX.merge(dfY,left_on=key, right_on=key)
+    merge_result_index = merge_result.columns.values
+
+
+
+    merge_result_values = merge_result.values
+
+    # TODO: for each colname in merge_result, drop each column of the form Order*
+    # TODO: switch the order of the id column to the first column. Drop then append?
+
+    print merge_result_index
+    #print merge_result_values
+
+
+    return merge_result
 
 # test the functions
 
 # load the e-dragon features
 data0 = load_molecular_descriptors(path0)
-print data0
 
 data1 = load_mmgbsa_energy(path1)
-print data1
-
 
 data2 = load_docking_results(path2)
-print data2
 
-data3 = load_dat(path3)
-print data3
-
-
+merged_data = get_merged_results(data1,data2,'Ligand')
