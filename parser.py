@@ -1,14 +1,13 @@
 import pandas as pd
 import argparse
+import sys
 
 
-path0 = "SampleInputs/MolecularDescriptors/E-DragonOutput7MolecularDescriptors"
 
-path1 = "SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5"
+paths = []
 
-path2 = "SampleInputs/1QCF_docking_results"
-
-path3 = "SampleInputs/1QCF_cluster1_CHEMBL568101.1.dat"
+for path in sys.argv[1:]:
+    paths.append(path)
 
 
 # create a function for reading each input file type
@@ -75,21 +74,19 @@ def get_merged_results(dfX,dfY,key):
 #TODO: write a function to merge the molecular descriptors to the docking and energy results. Will need regular expressions.
 #TODO: read the filenames from stdin and then execute necessary functions to generate output datafile
 
- parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser(description='Process some integers.')
 
 ## Load the data for each command line argument filepath
 
 # load the e-dragon features
-data0 = load_molecular_descriptors(path0)
+data0 = load_molecular_descriptors(paths[0])
 
 # load the mmgbsa energy features
-data1 = load_mmgbsa_energy(path1)
+data1 = load_mmgbsa_energy(paths[1])
 
 # load the docking results
-data2 = load_docking_results(path2)
+data2 = load_docking_results(paths[2])
 
 merged_data = get_merged_results(data1,data2,'Ligand')
 
-for mol_id in data0['MOL_ID']:
-    for ligand_id in data1['Ligand']:
-        print ligand_id.find(mol_id)
+
