@@ -8,6 +8,11 @@ for path in sys.argv[1:]:
     paths.append(path)
 
 def parse_file(filepath):
+    '''
+        Given a filepath, determines which parser to run in order to extract data. Returns a pandas DataFrame.
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
     data = pd.DataFrame()
     if filepath.find('.dat') != -1:
         print filepath.find('.dat')
@@ -28,15 +33,30 @@ def parse_file(filepath):
 # create a function for reading each input file type
 
 def load_molecular_descriptors(filepath):
+    '''
+        reads input files containing molecular descriptors
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
     data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
     return data
 
 def load_mmgbsa_energy(filepath):
+    '''
+        reads output from mmgbsa calculations
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
     return data
 
 def load_docking_results(filepath):
+    '''
+        reads docking results
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
     return data
@@ -80,7 +100,7 @@ def load_dat(filepath):
 def get_merged_results(dfX,dfY,key):
     '''
 
-    Wraps the pandas call to merge.
+    Merge two dataframes (datadrames assumed to have common key, does not support protein || drug and protein && drug matching).
 
     :param dfX: one of the two dataframes to be merged
     :param dfY: the other of the two dataframes to be merged
