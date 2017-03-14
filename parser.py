@@ -22,13 +22,11 @@ def load_molecular_descriptors(filepath):
 
 def load_mmgbsa_energy(filepath):
     data = pd.read_csv(filepath,delimiter='\t')
-    print data.columns.values
     data.drop('Order',axis=1,inplace=True)
     return data
 
 def load_docking_results(filepath):
     data = pd.read_csv(filepath,delimiter='\t')
-    print data.columns.values
     data.drop('Order',axis=1,inplace=True)
     return data
 
@@ -96,5 +94,7 @@ data0 = load_molecular_descriptors(path0)
 data1 = load_mmgbsa_energy(path1)
 
 data2 = load_docking_results(path2)
+
+data3 = load_dat(path3)
 
 merged_data = get_merged_results(data1,data2,'Ligand')
