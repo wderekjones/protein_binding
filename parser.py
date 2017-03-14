@@ -91,10 +91,10 @@ def get_merged_results(dfX,dfY,key):
     merge_result = merge_result.set_index(key).reset_index()
     return merge_result
 
-
 #TODO: write a function to merge the molecular descriptors to the docking and energy results. Will need regular expressions.
 #TODO: read the filenames from stdin and then execute necessary functions to generate output datafile
 #TODO: merge all resulting dataframes on id's
+
 
 for filepath in paths:
     d = parse_file(filepath)
