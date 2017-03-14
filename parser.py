@@ -2,13 +2,28 @@ import pandas as pd
 import argparse
 import sys
 
-
-
+# Get the input filepaths, store in a list
 paths = []
-
 for path in sys.argv[1:]:
     paths.append(path)
 
+def parse_file(filepath):
+    data = pd.DataFrame()
+    if filepath.find('.dat') != -1:
+        print filepath.find('.dat')
+        data = load_dat(filepath)
+    elif filepath.find('.pdbqt') != -1:
+        print 'Not implemented'
+    elif filepath.find('mmpbsa_energy') != -1:
+        data = load_mmgbsa_energy(filepath)
+    elif filepath.find('docking_results') != -1:
+        data = load_docking_results(filepath)
+    elif filepath.find('MolecularDescriptors') != -1:
+        data = load_molecular_descriptors(filepath)
+    else:
+        print 'File not supported'
+
+    return data
 
 # create a function for reading each input file type
 
@@ -27,6 +42,12 @@ def load_docking_results(filepath):
     return data
 
 def load_dat(filepath):
+    '''
+        Loads VINA results
+
+    :param filepath: path to file containing data
+    :return: a pandas dataframe of VINA results
+    '''
     file = open(filepath)
     feature_list = {}
     i = 0
@@ -73,20 +94,8 @@ def get_merged_results(dfX,dfY,key):
 
 #TODO: write a function to merge the molecular descriptors to the docking and energy results. Will need regular expressions.
 #TODO: read the filenames from stdin and then execute necessary functions to generate output datafile
+#TODO: merge all resulting dataframes on id's
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-
-## Load the data for each command line argument filepath
-
-# load the e-dragon features
-data0 = load_molecular_descriptors(paths[0])
-
-# load the mmgbsa energy features
-data1 = load_mmgbsa_energy(paths[1])
-
-# load the docking results
-data2 = load_docking_results(paths[2])
-
-merged_data = get_merged_results(data1,data2,'Ligand')
-
-
+for filepath in paths:
+    d = parse_file(filepath)
+    print d
