@@ -2,10 +2,29 @@ import pandas as pd
 import argparse
 import sys
 
-# Get the input filepaths, store in a list
-paths = []
-for path in sys.argv[1:]:
-    paths.append(path)
+
+def read_input_files():
+    df_dict = {}
+    file_index = 0
+
+    for path in sys.argv[1:]:
+        # need to merge molecular descriptors...
+        if file_index > 0:
+            df = parse_file(path)
+            df_dict[file_index] = df
+        file_index +=1
+
+    df_agg = pd.concat(df_dict,axis=0)
+    df_agg.shape
+    df_agg.drop_duplicates(inplace=True)
+
+    # output the aggregated file, need to find a better name...
+    df_agg.to_csv('ml_features.csv',sep=' ')
+
+    # TODO: verfy that there are no duplicates
+
+
+
 
 def parse_file(filepath):
     '''
@@ -39,6 +58,7 @@ def load_molecular_descriptors(filepath):
     :return: pandas DataFrame
     '''
     data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
+    data = data.set_index('MOL_ID').reset_index()
     return data
 
 def load_mmgbsa_energy(filepath):
@@ -49,6 +69,7 @@ def load_mmgbsa_energy(filepath):
     '''
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
+    data = data.set_index('Ligand').reset_index()
     return data
 
 def load_docking_results(filepath):
@@ -59,6 +80,7 @@ def load_docking_results(filepath):
     '''
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
+    data = data.set_index('Ligand').reset_index()
     return data
 
 def load_dat(filepath):
@@ -115,7 +137,26 @@ def get_merged_results(dfX,dfY,key):
 #TODO: read the filenames from stdin and then execute necessary functions to generate output datafile
 #TODO: merge all resulting dataframes on id's
 
+def merge_molec_descriptors(dfM,dfX):
+    # for each m_index in dfM
+        # for each x_index in dfX
+            #if m_index in x_index
+                #concatenate dfM[m_index] to dfX[x_index]
 
-for filepath in paths:
-    d = parse_file(filepath)
-    print d
+    #for m_index in dfM['MOL_ID'].values:
+    for m_row in dfM.itertuples():
+        #print m_row
+    #    for x_index in dfX['Ligand'].values:
+        for x_row in dfX.itertuples():
+            print x_row[1]
+            #if m_index in x_index:
+            #    print type(pd.concat([dfM[m_index],dfX[x_index]],axis=1))
+
+    return
+
+read_input_files()
+
+
+
+
+
