@@ -57,8 +57,31 @@ def load_molecular_descriptors(filepath):
     :param filepath: path to the input file
     :return: pandas DataFrame
     '''
+    
+    # no need to skip any line
     data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
+    # I don't know why
     data = data.set_index('MOL_ID').reset_index()
+    
+    # Fatemah Code
+    data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
+    
+    # rename duplicated moleculars
+    for index, row in data.iterrows():
+        molName = data.get_value(index,'NAME',takeable=False)
+        duplicatedMol = data.loc[data['NAME'] == molName]
+        rowNum = len(duplicatedMol.index)
+        
+        # there are duplicated Mol.
+        # rename from second molecule _#
+        molIndex = 0
+        if (rowNum>1):
+            for innerIndex, innerRow in duplicatedMol.iterrows():
+                molIndex = molIndex + 1
+                if (molIndex>1):
+                    newMolName = molName + '_' + str(molIndex)
+                    data.set_value(innerIndex,'NAME',newMolName)
+                    
     return data
 
 def load_mmgbsa_energy(filepath):
