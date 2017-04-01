@@ -83,7 +83,9 @@ def load_molecular_descriptors(filepath):
                 if (molIndex>1):
                     newMolName = molName + '_' + str(molIndex)
                     data.set_value(innerIndex,'NAME',newMolName)
-                    
+    
+    # rename the second column to use it as key in the merge 
+    data.columns.values[1] = 'moleculeName'
     return data
 
 def load_mmgbsa_energy(filepath):
@@ -140,7 +142,7 @@ def load_protein_features_2struc(filepath):
     '''
     data = pd.read_csv(filepath,delimiter=',')
     
-    # rename the first column to use it as key 
+    # rename the first column to use it as key in the merge 
     data.columns.values[0] = 'proteinName'
     
     return data
@@ -153,7 +155,7 @@ def load_protein_features_coach_avg(filepath):
     '''
     data = pd.read_csv(filepath,delimiter=',')
     
-    # rename the first column to use it as key 
+    # rename the first column to use it as key in the merge 
     data.columns.values[0] = 'proteinName'
     
     return data
