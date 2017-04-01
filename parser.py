@@ -1,6 +1,7 @@
 import pandas as pd
 import argparse
 import sys
+import re
 
 
 def read_input_files():
@@ -104,6 +105,18 @@ def load_docking_results(filepath):
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
     data = data.set_index('Ligand').reset_index()
+    
+    # remove .pdbqt from the Ligand 
+    data['Ligand'] = pd.DataFrame(data.Ligand.str.replace('.pdbqt',''))
+    
+    # extract protein name from Ligand and store it in new column 
+    data['proteinName'] = data['Ligand'].str.extract('(...._cluster\d+)', expand=True)
+    
+    # extract molecule name from Ligand and store it in new column
+    data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
+    
+    # do we need to drop Ligand column ??
+    
     return data
 
 def load_dat(filepath):
