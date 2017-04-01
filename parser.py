@@ -141,7 +141,7 @@ def load_protein_features_2struc(filepath):
     data = pd.read_csv(filepath,delimiter=',')
     
     # rename the first column to use it as key 
-    data.columns.values[0] = 'cluster_name'
+    data.columns.values[0] = 'proteinName'
     
     return data
     
@@ -154,7 +154,7 @@ def load_protein_features_coach_avg(filepath):
     data = pd.read_csv(filepath,delimiter=',')
     
     # rename the first column to use it as key 
-    data.columns.values[0] = 'cluster_name'
+    data.columns.values[0] = 'proteinName'
     
     return data
 
