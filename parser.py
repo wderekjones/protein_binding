@@ -24,9 +24,6 @@ def read_input_files():
 
     # TODO: verfy that there are no duplicates
 
-
-
-
 def parse_file(filepath):
     '''
         Given a filepath, determines which parser to run in order to extract data. Returns a pandas DataFrame.
@@ -128,6 +125,26 @@ def load_docking_results(filepath):
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
     
     # do we need to drop Ligand column ??
+    
+    return data
+
+def load_protein_features_2struc(filepath):
+    '''
+        reads protein_features_2struc
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
+    data = pd.read_csv(filepath,delimiter=',')
+    
+    return data
+    
+def load_protein_features_coach_avg(filepath):
+    '''
+        reads protein_features_coach_avg
+    :param filepath: path to the input file
+    :return: pandas DataFrame
+    '''
+    data = pd.read_csv(filepath,delimiter=',')
     
     return data
 
