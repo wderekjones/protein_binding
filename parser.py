@@ -206,6 +206,9 @@ def get_merged_results(dfX,dfY,key):
     :param key: a string denoting the column on which the dataframes will be merged
     :return: a pandas dataframe containing the matches between the two dataframes (maximum = least row dimenison of dfX or dfY)
     '''
+    
+    # merge_docking_mmpbsa = mmpbsaResults.merge(dockingResults, how='outer', left_on='Ligand', right_on='Ligand')
+    
     merge_result = dfX.merge(dfY,left_on=key, right_on=key)
     merge_result = merge_result.set_index(key).reset_index()
     return merge_result
