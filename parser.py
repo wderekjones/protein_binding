@@ -42,6 +42,10 @@ def parse_file(filepath):
         data = load_docking_results(filepath)
     elif filepath.find('MolecularDescriptors') != -1:
         data = load_molecular_descriptors(filepath)
+    elif filepath.find('protein_features_coach_avg') != -1: # not sure
+        data =  load_protein_features_coach_avg(filepath)
+    elif filepath.find('protein_features_2struc') != -1: # not sure
+        data =  load_protein_features_2struc(filepath)
     else:
         print 'File not supported'
 
