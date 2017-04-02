@@ -217,6 +217,7 @@ def get_merged_results(dfX,dfY,key):
     # merge_docking_mmpbsa = pd.merge(mmpbsaResults,dockingResults, how='outer' , on=['proteinName','moleculeName'])
     # merge_docking_mmpbsa_descriptors = pd.merge(merge_docking_mmpbsa,descriptorsResults, how='outer', on='moleculeName')
     # merge_protein2struc_proteinCoach = pd.merge(protein2struc , proteinCoach,on='proteinName')
+    # merge_all = pd.merge(merge_docking_mmpbsa_descriptors,merge_protein2struc_proteinCoach,how='left',on='proteinName')
     
     merge_result = dfX.merge(dfY,left_on=key, right_on=key)
     merge_result = merge_result.set_index(key).reset_index()
