@@ -85,7 +85,7 @@ def load_molecular_descriptors(filepath):
                     data.set_value(innerIndex,'NAME',newMolName)
     
     # rename the second column to use it as key in the merge 
-    data.columns.values[1] = 'moleculeName'
+    descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
     return data
 
 def load_mmgbsa_energy(filepath):
@@ -107,7 +107,10 @@ def load_mmgbsa_energy(filepath):
     # extract molecule name from Ligand and store it in new column
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
     
-    # do we need to drop Ligand column ??
+    # rename Energy col
+    data.rename(columns={'Energy':'dockingEnergy'}, inplace = True)
+    
+    data = data.drop('Ligand',1)
     
     return data
 
@@ -130,7 +133,11 @@ def load_docking_results(filepath):
     # extract molecule name from Ligand and store it in new column
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
     
+     # rename Energy col
+    data.rename(columns={'Energy':'dockingEnergy'}, inplace = True)
+    
     # do we need to drop Ligand column ??
+    data = data.drop('Ligand',1)
     
     return data
 
@@ -207,7 +214,8 @@ def get_merged_results(dfX,dfY,key):
     :return: a pandas dataframe containing the matches between the two dataframes (maximum = least row dimenison of dfX or dfY)
     '''
     
-    # merge_docking_mmpbsa = mmpbsaResults.merge(dockingResults, how='outer', left_on='Ligand', right_on='Ligand')
+    # merge_docking_mmpbsa = pd.merge(mmpbsaResults,dockingResults, how='outer' , on=['proteinName','moleculeName'])
+    # merge_docking_mmpbsa_descriptors = pd.merge(merge_docking_mmpbsa,descriptorsResults, how='outer', on='moleculeName')
     
     merge_result = dfX.merge(dfY,left_on=key, right_on=key)
     merge_result = merge_result.set_index(key).reset_index()
