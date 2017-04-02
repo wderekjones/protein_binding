@@ -10,9 +10,8 @@ def read_input_files():
 
     for path in sys.argv[1:]:
         # need to merge molecular descriptors...
-        if file_index > 0:
-            df = parse_file(path)
-            df_dict[file_index] = df
+        df = parse_file(path)
+        df_dict[file_index] = df
         file_index +=1
 
     df_agg = pd.concat(df_dict,axis=0)
@@ -22,7 +21,6 @@ def read_input_files():
     # output the aggregated file, need to find a better name...
     df_agg.to_csv('ml_features.csv',sep=' ')
 
-    # TODO: verfy that there are no duplicates
 
 def parse_file(filepath):
     '''
@@ -85,7 +83,8 @@ def load_molecular_descriptors(filepath):
                     data.set_value(innerIndex,'NAME',newMolName)
     
     # rename the second column to use it as key in the merge 
-    descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
+    #descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
+    data.rename(columns={'NAME':'moleculeName'}, inplace = True)
     return data
 
 def load_mmgbsa_energy(filepath):
@@ -227,7 +226,7 @@ def get_merged_results(dfX,dfY,key):
 #TODO: read the filenames from stdin and then execute necessary functions to generate output datafile
 #TODO: merge all resulting dataframes on id's
 
-def merge_molec_descriptors(dfM,dfX):
+'''def merge_molec_descriptors(dfM,dfX):
     # for each m_index in dfM
         # for each x_index in dfX
             #if m_index in x_index
@@ -242,7 +241,7 @@ def merge_molec_descriptors(dfM,dfX):
             #if m_index in x_index:
             #    print type(pd.concat([dfM[m_index],dfX[x_index]],axis=1))
 
-    return
+    return'''
 
 read_input_files()
 
