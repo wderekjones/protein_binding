@@ -2,25 +2,18 @@ import pandas as pd
 import argparse
 import sys
 import re
+import functools
 
 
 def read_input_files():
-    df_dict = {}
-    file_index = 0
+    df_list = []
 
     for path in sys.argv[1:]:
-        # need to merge molecular descriptors...
         df = parse_file(path)
-        df_dict[file_index] = df
-        file_index +=1
+        df_list.append(df)
 
-    df_agg = pd.concat(df_dict,axis=0)
-    df_agg.shape
-    df_agg.drop_duplicates(inplace=True)
-
-    # output the aggregated file, need to find a better name...
+    df_agg = reduce(lambda x,y:pd.merge(x,y,on=["moleculeName"]),df_list)
     df_agg.to_csv('ml_features.csv',sep=' ')
-
 
 def parse_file(filepath):
     '''
@@ -28,6 +21,7 @@ def parse_file(filepath):
     :param filepath: path to the input file
     :return: pandas DataFrame
     '''
+
     data = pd.DataFrame()
     if filepath.find('.dat') != -1:
         print filepath.find('.dat')
@@ -57,11 +51,6 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
     :param filepath: path to the input file
     :return: pandas DataFrame
     '''
-    
-    # no need to skip any line
-    data = pd.read_csv(filepath,delimiter='\t',skiprows=2)
-    # I don't know why
-    data = data.set_index('MOL_ID').reset_index()
     
     # Fatemah Code
     data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
@@ -95,6 +84,7 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
     # rename the second column to use it as key in the merge 
     #descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
     data.rename(columns={'NAME':'moleculeName'}, inplace = True)
+
     return data
 
 def load_mmgbsa_energy(filepath):
@@ -117,10 +107,10 @@ def load_mmgbsa_energy(filepath):
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
     
     # rename Energy col
-    data.rename(columns={'Energy':'dockingEnergy'}, inplace = True)
+    data.rename(columns={'Energy':'mmgbsaEnergy'}, inplace = True)
     
     data = data.drop('Ligand',1)
-    
+
     return data
 
 def load_docking_results(filepath):
@@ -147,7 +137,7 @@ def load_docking_results(filepath):
     
     # do we need to drop Ligand column ??
     data = data.drop('Ligand',1)
-    
+
     return data
 
 def load_protein_features_2struc(filepath):
@@ -160,7 +150,8 @@ def load_protein_features_2struc(filepath):
     
     # rename the first column to use it as key in the merge 
     data.rename(columns={'Cluster_Name':'proteinName'}, inplace = True)
-    
+    print data.index.name
+
     return data
     
 def load_protein_features_coach_avg(filepath):
@@ -173,7 +164,6 @@ def load_protein_features_coach_avg(filepath):
     
     # rename the first column to use it as key in the merge 
     data.rename(columns={'cluster_name':'proteinName'}, inplace = True)
-    
     return data
 
 def load_dat(filepath):
@@ -227,7 +217,8 @@ def get_merged_results(dfX,dfY,key):
     # merge_docking_mmpbsa_descriptors = pd.merge(merge_docking_mmpbsa,descriptorsResults, how='outer', on='moleculeName')
     # merge_protein2struc_proteinCoach = pd.merge(protein2struc , proteinCoach,on='proteinName')
     # merge_all = pd.merge(merge_docking_mmpbsa_descriptors,merge_protein2struc_proteinCoach,how='left',on='proteinName')
-    
+
+
     merge_result = dfX.merge(dfY,left_on=key, right_on=key)
     merge_result = merge_result.set_index(key).reset_index()
     return merge_result
