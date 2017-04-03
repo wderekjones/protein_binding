@@ -6,13 +6,18 @@ import functools
 
 
 def read_input_files():
+    #create an empty list to store the dataframes
     df_list = []
 
+    #for each input file path, load the dataframe then append to the dataframe list
     for path in sys.argv[1:]:
         df = parse_file(path)
         df_list.append(df)
 
+    #do a pairwise merge (inner join) for each dataframe in the dataframe list
     df_agg = reduce(lambda x,y:pd.merge(x,y,on=["moleculeName"]),df_list)
+
+    #output the aggregated dataframe to .csv
     df_agg.to_csv('ml_features.csv',sep=' ')
 
 def parse_file(filepath):
