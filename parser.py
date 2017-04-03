@@ -215,44 +215,6 @@ def load_dat(filepath):
     df = pd.DataFrame([feature_list])
     return df
 
-def get_merged_results(dfX,dfY,key):
-    '''
-
-    Merge two dataframes (datadrames assumed to have common key, does not support protein || drug and protein && drug matching).
-
-    :param dfX: one of the two dataframes to be merged
-    :param dfY: the other of the two dataframes to be merged
-    :param key: a string denoting the column on which the dataframes will be merged
-    :return: a pandas dataframe containing the matches between the two dataframes (maximum = least row dimenison of dfX or dfY)
-    '''
-    
-    # merge_docking_mmpbsa = pd.merge(mmpbsaResults,dockingResults, how='outer' , on=['proteinName','moleculeName'])
-    # merge_docking_mmpbsa_descriptors = pd.merge(merge_docking_mmpbsa,descriptorsResults, how='outer', on='moleculeName')
-    # merge_protein2struc_proteinCoach = pd.merge(protein2struc , proteinCoach,on='proteinName')
-    # merge_all = pd.merge(merge_docking_mmpbsa_descriptors,merge_protein2struc_proteinCoach,how='left',on='proteinName')
-
-
-    merge_result = dfX.merge(dfY,left_on=key, right_on=key)
-    merge_result = merge_result.set_index(key).reset_index()
-    return merge_result
-
-'''def merge_molec_descriptors(dfM,dfX):
-    # for each m_index in dfM
-        # for each x_index in dfX
-            #if m_index in x_index
-                #concatenate dfM[m_index] to dfX[x_index]
-m
-    #for m_index in dfM['MOL_ID'].values:
-    for m_row in dfM.itertuples():
-        #print m_row
-    #    for x_index in dfX['Ligand'].values:
-        for x_row in dfX.itertuples():
-            print x_row[1]
-            #if m_index in x_index:
-            #    print type(pd.concat([dfM[m_index],dfX[x_index]],axis=1))
-
-    return'''
-
 read_input_files()
 
 
