@@ -4,6 +4,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--f',type = str,nargs='+')
+parser.add_argument('--m',type=str) #molecular descriptors file
 parser.add_argument('--feats',type = str)   # need to add default behavior, i.e. if no file is passed then use all features
 args = parser.parse_args()
 
@@ -18,10 +19,14 @@ def read_input_files():
         df_list.append(df)
 
     #do a pairwise merge (inner join) for each dataframe in the dataframe list
-    df_agg = reduce(lambda x,y:pd.merge(x,y,on=["moleculeName"]),df_list)
+    df_agg = reduce(lambda x,y:pd.merge(x,y,on=["moleculeName","proteinName"]),df_list)
+
+    mol_df = parse_file(args.m)
+
+    output_df = pd.merge(mol_df,df_agg, on="moleculeName")
 
     #output the aggregated dataframe to .csv
-    df_agg.to_csv('ml_features.csv',sep=' ')
+    output_df.to_csv('ml_features.csv',sep=' ')
 
 def parse_file(filepath):
     '''
@@ -236,7 +241,7 @@ def get_merged_results(dfX,dfY,key):
         # for each x_index in dfX
             #if m_index in x_index
                 #concatenate dfM[m_index] to dfX[x_index]
-
+m
     #for m_index in dfM['MOL_ID'].values:
     for m_row in dfM.itertuples():
         #print m_row

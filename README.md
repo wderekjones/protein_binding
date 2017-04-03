@@ -7,10 +7,13 @@ In order to run the parser:
 
 ex:	> python parser.py --f SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5 SampleInputs/1QCF_docking_results /molculardescriptors --feats /path/to/file/containing/features
 
-where: --f specifies the (list) of input file paths to read
-       --feats specifies the file containing the features to keep from the E-Dragon molecular descriptors output\
+where:
 
+       --f specifies the (list) of input file paths to read
+       --feats specifies the file containing the features to keep from the E-Dragon molecular descriptors output
+       --m denotes molecular descriptors file
 
+verbose ex: > python parser.py --m "SampleInputs/MolecularDescriptors-Dragon7/outputAllDescriptors.txt" --f "SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5" "SampleInputs/1QCF_docking_results" --feats "SampleInputs/MolecularDescriptors-Dragon7/outputExclusionDescriptors.txt"
 
 	
 
