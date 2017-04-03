@@ -1,8 +1,11 @@
 import pandas as pd
 import argparse
-import sys
-import re
-import functools
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--f',type = str,nargs='+')
+parser.add_argument('--feats',type = str)   # need to add default behavior, i.e. if no file is passed then use all features
+args = parser.parse_args()
 
 
 def read_input_files():
@@ -10,7 +13,7 @@ def read_input_files():
     df_list = []
 
     #for each input file path, load the dataframe then append to the dataframe list
-    for path in sys.argv[1:]:
+    for path in args.f:
         df = parse_file(path)
         df_list.append(df)
 
@@ -38,7 +41,7 @@ def parse_file(filepath):
     elif filepath.find('docking_results') != -1:
         data = load_docking_results(filepath)
     elif filepath.find('MolecularDescriptors') != -1:
-        data = load_molecular_descriptors(filepath)
+        data = load_molecular_descriptors(filepath,args.feats)
     elif filepath.find('protein_features_coach_avg') != -1: # not sure
         data =  load_protein_features_coach_avg(filepath)
     elif filepath.find('protein_features_2struc') != -1: # not sure
