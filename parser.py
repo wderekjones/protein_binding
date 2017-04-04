@@ -2,10 +2,10 @@ import pandas as pd
 import argparse
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--f',type = str,nargs='+')
-parser.add_argument('--m',type=str) #molecular descriptors file
-parser.add_argument('--feats',type = str)   # need to add default behavior, i.e. if no file is passed then use all features
+parser = argparse.ArgumentParser(description = "Process files containing protein binding affinity features")
+parser.add_argument('--f',type = str,nargs='+',help="list paths of files containing protein-drug compound features")
+parser.add_argument('--m',type=str, help = "file containing molecular descriptors")
+parser.add_argument('--feats',type = str, help ="file containing which molecular descriptors to keep")   # need to add default behavior, i.e. if no file is passed then use all features
 args = parser.parse_args()
 
 
