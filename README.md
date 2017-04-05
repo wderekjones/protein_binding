@@ -9,7 +9,7 @@ In order to run the parser:
 
 where:
 
-       --f specifies the (list) of input file paths to read
+       --f specifies the (list) of summary input file paths to read
        --feats specifies the file containing the features to keep from the E-Dragon molecular descriptors output
        --m denotes molecular descriptors file
 
