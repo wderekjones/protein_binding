@@ -23,9 +23,10 @@ def read_input_files():
 
     mol_df = parse_file(args.m)
 
-    output_df = pd.merge(mol_df,df_agg, on="moleculeName")
+    output_df = pd.merge(df_agg,mol_df, on="moleculeName")
 
     #output the aggregated dataframe to .csv
+    #TODO: fix the formatting of the output file to have the keys justified to the left and data following on the right
     output_df.to_csv('ml_features.csv',sep=' ')
 
 def parse_file(filepath):
@@ -67,7 +68,7 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
     
     # Fatemah Code
     data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
-    
+
     # rename duplicated moleculars
     for index, row in data.iterrows():
         molName = data.get_value(index,'NAME',takeable=False)
