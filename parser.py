@@ -71,18 +71,19 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
     # rename duplicated moleculars
     for index, row in data.iterrows():
         molName = data.get_value(index,'NAME',takeable=False)
-        duplicatedMol = data.loc[data['NAME'] == molName]
-        rowNum = len(duplicatedMol.index)
+        if(molName.find('_')==-1):
+            duplicatedMol = data.loc[data['NAME'] == molName]
+            rowNum = len(duplicatedMol.index)
         
-        # there are duplicated Mol.
-        # rename from second molecule _#
-        molIndex = 0
-        if (rowNum>1):
-            for innerIndex, innerRow in duplicatedMol.iterrows():
-                molIndex = molIndex + 1
-                if (molIndex>1):
-                    newMolName = molName + '_' + str(molIndex)
-                    data.set_value(innerIndex,'NAME',newMolName)
+            # there are duplicated Mol.
+            # rename from second molecule _#
+            molIndex = 0
+            if (rowNum>1):
+                for innerIndex, innerRow in duplicatedMol.iterrows():
+                    molIndex = molIndex + 1
+                    if (molIndex>1):
+                        newMolName = molName + '_' + str(molIndex)
+                        data.set_value(innerIndex,'NAME',newMolName)
     
     # select descriptorsList
     with open(descriptorsListFile) as f:
