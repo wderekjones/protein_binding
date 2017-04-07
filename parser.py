@@ -66,7 +66,6 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
     :return: pandas DataFrame
     '''
     
-    # Fatemah Code
     data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
 
     # rename duplicated moleculars
