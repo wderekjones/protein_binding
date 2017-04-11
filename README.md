@@ -14,7 +14,7 @@ where:
        --m denotes molecular descriptors file
 
 example:
-> python parser.py --f "SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5" "SampleInputs/1QCF_docking_results" --m "SampleInputs/MolecularDescriptors-Dragon7/outputAllDescriptors.txt"  --feats "SampleInputs/MolecularDescriptors-Dragon7/outputExclusionDescriptors.txt"
+> python parser.py --f "SampleInputs/1QCF_cluster1_mmpbsa_energy_avg_5" "SampleInputs/1QCF_docking_results" --m "SampleInputs/MolecularDescriptors-Dragon7/outputAllMolecularDescriptors.txt"  --feats "SampleInputs/MolecularDescriptors-Dragon7/descriptorsListTS2.txt"
 
 	
 
