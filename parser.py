@@ -59,7 +59,7 @@ def parse_file(filepath):
 
 # create a function for reading each input file type
 
-def load_molecular_descriptors(filepath,descriptorsListFile):
+def load_molecular_descriptors(filepath,descriptorsListFile=None):
     '''
         reads input files containing molecular descriptors
     :param filepath: path to the input file
@@ -85,15 +85,15 @@ def load_molecular_descriptors(filepath,descriptorsListFile):
                         newMolName = molName + '_' + str(molIndex)
                         data.set_value(innerIndex,'NAME',newMolName)
     
-    # select descriptorsList
-    with open(descriptorsListFile) as f:
-        descriptorsList = f.read().splitlines()
-        
-    descriptorsList.append('NAME')
-    for index, column in data.iteritems():
-        #index =  column name
-        if (index not in descriptorsList):
-            data.drop(index,axis=1 , inplace=True)
+    # select descriptorsList if there is
+    if (descriptorsListFile!=None):
+        with open(descriptorsListFile) as f:
+            descriptorsList = f.read().splitlines()
+            descriptorsList.append('NAME')
+            for index, column in data.iteritems():
+            #index =  column name
+            if (index not in descriptorsList):
+                data.drop(index,axis=1 , inplace=True)
     
     # rename the second column to use it as key in the merge 
     #descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
