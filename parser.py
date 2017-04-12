@@ -48,6 +48,8 @@ def parse_file(filepath):
         data = load_docking_results(filepath)
     elif filepath.find('MolecularDescriptors') != -1:
         data = load_molecular_descriptors(filepath,args.feats)
+    elif filepath.find('docking_summary_features') != -1:
+        data = load_docking_summary_features(filepath)
     elif filepath.find('protein_features_coach_avg') != -1: # not sure
         data =  load_protein_features_coach_avg(filepath)
     elif filepath.find('protein_features_2struc') != -1: # not sure
@@ -65,7 +67,7 @@ def load_molecular_descriptors(filepath,descriptorsListFile=None):
     :param filepath: path to the input file
     :return: pandas DataFrame
     '''
-    
+
     data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
 
     # rename duplicated moleculars
@@ -74,7 +76,7 @@ def load_molecular_descriptors(filepath,descriptorsListFile=None):
         if(molName.find('_')==-1):
             duplicatedMol = data.loc[data['NAME'] == molName]
             rowNum = len(duplicatedMol.index)
-        
+
             # there are duplicated Mol.
             # rename from second molecule _#
             molIndex = 0
@@ -84,7 +86,7 @@ def load_molecular_descriptors(filepath,descriptorsListFile=None):
                     if (molIndex>1):
                         newMolName = molName + '_' + str(molIndex)
                         data.set_value(innerIndex,'NAME',newMolName)
-    
+
     # select descriptorsList if there is
     if (descriptorsListFile!=None):
         with open(descriptorsListFile) as f:
@@ -94,8 +96,8 @@ def load_molecular_descriptors(filepath,descriptorsListFile=None):
             #index =  column name
             if (index not in descriptorsList):
                 data.drop(index,axis=1 , inplace=True)
-    
-    # rename the second column to use it as key in the merge 
+
+    # rename the second column to use it as key in the merge
     #descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
     data.rename(columns={'NAME':'moleculeName'}, inplace = True)
 
@@ -110,19 +112,19 @@ def load_mmgbsa_energy(filepath):
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
     data = data.set_index('Ligand').reset_index()
-    
-    # remove .pdbqt from the Ligand 
+
+    # remove .pdbqt from the Ligand
     data['Ligand'] = pd.DataFrame(data.Ligand.str.replace('.pdbqt',''))
-    
-    # extract protein name from Ligand and store it in new column 
+
+    # extract protein name from Ligand and store it in new column
     data['proteinName'] = data['Ligand'].str.extract('(...._cluster\d+)', expand=True)
-    
+
     # extract molecule name from Ligand and store it in new column
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
-    
+
     # rename Energy col
     data.rename(columns={'Energy':'mmgbsaEnergy'}, inplace = True)
-    
+
     data = data.drop('Ligand',1)
 
     return data
@@ -136,21 +138,35 @@ def load_docking_results(filepath):
     data = pd.read_csv(filepath,delimiter='\t')
     data.drop('Order',axis=1,inplace=True)
     data = data.set_index('Ligand').reset_index()
-    
-    # remove .pdbqt from the Ligand 
+
+    # remove .pdbqt from the Ligand
     data['Ligand'] = pd.DataFrame(data.Ligand.str.replace('.pdbqt',''))
-    
-    # extract protein name from Ligand and store it in new column 
+
+    # extract protein name from Ligand and store it in new column
     data['proteinName'] = data['Ligand'].str.extract('(...._cluster\d+)', expand=True)
-    
+
     # extract molecule name from Ligand and store it in new column
     data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
-    
+
      # rename Energy col
     data.rename(columns={'Energy':'dockingEnergy'}, inplace = True)
-    
+
     # do we need to drop Ligand column ??
     data = data.drop('Ligand',1)
+
+    return data
+
+def load_docking_summary_features(filepath):
+    data = pd.read_csv(filepath)
+
+    # extract protein name from Ligand and store it in new column
+    data['proteinName'] = data['Filename'].str.extract('(...._cluster\d+)', expand=True)
+
+    # extract molecule name from Ligand and store it in new column
+    data['moleculeName'] = data['Filename'].str.extract('((?<=cluster\d_)\w+)', expand=True)
+
+    columns = ['proteinName', 'moleculeName', 'avg_gauss1', 'avg_gauss2', 'avg_repulsion', 'avg_hydrophobic', 'avg_hydrogen', 'Model1.gauss1', 'Model1.gauss2', 'Model1.repulsion', 'Model1.hydrophobic', 'Model1.hydrogen', 'label']
+    data = data[columns]
 
     return data
 
@@ -161,13 +177,13 @@ def load_protein_features_2struc(filepath):
     :return: pandas DataFrame
     '''
     data = pd.read_csv(filepath,delimiter=',')
-    
-    # rename the first column to use it as key in the merge 
+
+    # rename the first column to use it as key in the merge
     data.rename(columns={'Cluster_Name':'proteinName'}, inplace = True)
     print data.index.name
 
     return data
-    
+
 def load_protein_features_coach_avg(filepath):
     '''
         reads protein_features_coach_avg
@@ -175,8 +191,8 @@ def load_protein_features_coach_avg(filepath):
     :return: pandas DataFrame
     '''
     data = pd.read_csv(filepath,delimiter=',')
-    
-    # rename the first column to use it as key in the merge 
+
+    # rename the first column to use it as key in the merge
     data.rename(columns={'cluster_name':'proteinName'}, inplace = True)
     return data
 
@@ -217,8 +233,3 @@ def load_dat(filepath):
     return df
 
 read_input_files()
-
-
-
-
-
