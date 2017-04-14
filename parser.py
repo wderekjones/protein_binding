@@ -38,18 +38,16 @@ def read_input_files():
     # read molecular features file
     mol_df = parse_file(args.m)
 
-
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
     output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
 
+    labels_df = output_df[["proteinName", "moleculeName", "label"]]
 
+    # drop the labels from the features dataframe
+    output_df.drop(["label"],axis = 1)
     # output the aggregated dataframe to .csv, remove the header
     output_df.to_csv('ml_pro_features.csv', index=False)
-
-    #print type(output_df)
-
-    #print output_df.columns.values()
-
+    labels_df.to_csv('ml_pro_labels.csv')
 
 def parse_file(filepath):
     '''
