@@ -1,162 +1,129 @@
-import pandas as pd
 import argparse
 
+import pandas as pd
 
-parser = argparse.ArgumentParser(description = "Process files containing protein binding affinity features")
-parser.add_argument('--f',type = str,nargs='+',help="list paths of files containing protein-drug compound features")
-parser.add_argument('--m',type=str, help = "file containing molecular descriptors")
-parser.add_argument('--feats',type = str, help ="file containing which molecular descriptors to keep")   # need to add default behavior, i.e. if no file is passed then use all features
+parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
+
+parser.add_argument('--p', type=str, nargs='+', help="list paths of files containing protein features")
+
+parser.add_argument('--f', type=str, help="list paths of files containing protein-molecular compound features")
+
+parser.add_argument('--m', type=str, help="file containing molecular descriptors")
+
+parser.add_argument('--feats', type=str, help="file containing which molecular descriptors to keep")
 args = parser.parse_args()
 
 
 def read_input_files():
-    #create an empty list to store the dataframes
-    df_list = []
+    # create an empty list to store the dataframes of protein features
+    df_pro_list = []
 
-    #for each input file path, load the dataframe then append to the dataframe list
-    for path in args.f:
+    # for each input file of protein features, load the dataframe then append to the dataframe list
+    for path in args.p:
         df = parse_file(path)
-        df_list.append(df)
+        df_pro_list.append(df)
 
-    #do a pairwise merge (inner join) for each dataframe in the dataframe list
-    df_agg = reduce(lambda x,y:pd.merge(x,y,on=["moleculeName","proteinName"]),df_list)
+    # do a pairwise merge (inner join) for each dataframe in the dataframe list
+    df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName"]), df_pro_list)
 
+    print df_agg_pro.shape
+
+    # read protein-molecular features file
+    pro_drug_df = parse_file(args.f)
+
+    print pro_drug_df.shape
+
+    # merge protein-molecular features with protein features
+    pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
+
+    print pro_drug_all_df.shape
+
+    # read molecular features file
     mol_df = parse_file(args.m)
 
-    output_df = pd.merge(df_agg,mol_df, on="moleculeName")
+    print mol_df.shape
 
-    #output the aggregated dataframe to .csv
-    #TODO: fix the formatting of the output file to have the keys justified to the left and data following on the right
-    output_df.to_csv('ml_features.csv',sep=' ')
+    # do a pairwise merge (inner join) of molecular features with all protein-molecular features
+    output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
+
+    print output_df.shape
+
+    # output the aggregated dataframe to .csv
+    # TODO: fix the formatting of the output file to have the keys justified to the left and data following on the right
+
+    output_df.to_csv('ml_pro_features.csv', index=False)
+
 
 def parse_file(filepath):
     '''
         Given a filepath, determines which parser to run in order to extract data. Returns a pandas DataFrame.
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
+        :param filepath: path to the input file
+        :return: pandas DataFrame
+        '''
 
     data = pd.DataFrame()
-    if filepath.find('.dat') != -1:
-        print filepath.find('.dat')
-        data = load_dat(filepath)
-    elif filepath.find('.pdbqt') != -1:
-        print 'Not implemented'
-    elif filepath.find('mmpbsa_energy') != -1:
-        data = load_mmgbsa_energy(filepath)
-    elif filepath.find('docking_results') != -1:
-        data = load_docking_results(filepath)
+
+    if filepath.find('docking') != -1:
+        data = load_protein_molecular_features(filepath)
     elif filepath.find('MolecularDescriptors') != -1:
-        data = load_molecular_descriptors(filepath,args.feats)
-    elif filepath.find('docking_summary_features') != -1:
-        data = load_docking_summary_features(filepath)
-    elif filepath.find('protein_features_coach_avg') != -1: # not sure
-        data =  load_protein_features_coach_avg(filepath)
-    elif filepath.find('protein_features_2struc') != -1: # not sure
-        data =  load_protein_features_2struc(filepath)
+        data = load_molecular_descriptors(filepath, args.feats)
+    elif filepath.find('protein_features') != -1:  # protein_features_coach_avg and protein_features_2struc
+        data = load_protein_features(filepath)
     else:
         print 'File not supported'
 
     return data
 
+
 # create a function for reading each input file type
 
-def load_molecular_descriptors(filepath,descriptorsListFile=None):
+def load_molecular_descriptors(filepath, descriptorsListFile=None):
     '''
         reads input files containing molecular descriptors
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
+        :param filepath: path to the input file
+        :return: pandas DataFrame
+        '''
 
-    data = pd.read_csv(filepath,delimiter='\t', low_memory=False)
+    data = pd.read_csv(filepath, delimiter='\t', low_memory=False)
 
     # rename duplicated moleculars
     for index, row in data.iterrows():
-        molName = data.get_value(index,'NAME',takeable=False)
-        if(molName.find('_')==-1):
+        molName = data.get_value(index, 'NAME', takeable=False)
+        if (molName.find('_') == -1):
             duplicatedMol = data.loc[data['NAME'] == molName]
             rowNum = len(duplicatedMol.index)
 
             # there are duplicated Mol.
             # rename from second molecule _#
             molIndex = 0
-            if (rowNum>1):
+            if (rowNum > 1):
                 for innerIndex, innerRow in duplicatedMol.iterrows():
                     molIndex = molIndex + 1
-                    if (molIndex>1):
+                    if (molIndex > 1):
                         newMolName = molName + '_' + str(molIndex)
-                        data.set_value(innerIndex,'NAME',newMolName)
+                        data.set_value(innerIndex, 'NAME', newMolName)
 
     # select descriptorsList if there is
-    if (descriptorsListFile!=None):
+    if (descriptorsListFile != None):
         with open(descriptorsListFile) as f:
             descriptorsList = f.read().splitlines()
-            descriptorsList.append('NAME')
-            for index, column in data.iteritems():
-            #index =  column name
+
+        descriptorsList.append('NAME')
+
+        # Doesn't work becuase may some columns are not exist in the data when we use outputExclusionMolecularDescriptors.txt
+        # data = data[descriptorsList]
+
+        for index, column in data.iteritems():  # index =  column name
             if (index not in descriptorsList):
-                data.drop(index,axis=1 , inplace=True)
+                data.drop(index, axis=1, inplace=True)
 
     # rename the second column to use it as key in the merge
-    #descriptorsResults.rename(columns={'NAME':'moleculeName'}, inplace = True)
-    data.rename(columns={'NAME':'moleculeName'}, inplace = True)
+    data.rename(columns={'NAME': 'moleculeName'}, inplace=True)
 
     return data
 
-def load_mmgbsa_energy(filepath):
-    '''
-        reads output from mmgbsa calculations
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
-    data = pd.read_csv(filepath,delimiter='\t')
-    data.drop('Order',axis=1,inplace=True)
-    data = data.set_index('Ligand').reset_index()
 
-    # remove .pdbqt from the Ligand
-    data['Ligand'] = pd.DataFrame(data.Ligand.str.replace('.pdbqt',''))
-
-    # extract protein name from Ligand and store it in new column
-    data['proteinName'] = data['Ligand'].str.extract('(...._cluster\d+)', expand=True)
-
-    # extract molecule name from Ligand and store it in new column
-    data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
-
-    # rename Energy col
-    data.rename(columns={'Energy':'mmgbsaEnergy'}, inplace = True)
-
-    data = data.drop('Ligand',1)
-
-    return data
-
-def load_docking_results(filepath):
-    '''
-        reads docking results
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
-    data = pd.read_csv(filepath,delimiter='\t')
-    data.drop('Order',axis=1,inplace=True)
-    data = data.set_index('Ligand').reset_index()
-
-    # remove .pdbqt from the Ligand
-    data['Ligand'] = pd.DataFrame(data.Ligand.str.replace('.pdbqt',''))
-
-    # extract protein name from Ligand and store it in new column
-    data['proteinName'] = data['Ligand'].str.extract('(...._cluster\d+)', expand=True)
-
-    # extract molecule name from Ligand and store it in new column
-    data['moleculeName'] = data['Ligand'].str.extract('((?<=cluster\d_)\w+)', expand=True)
-
-     # rename Energy col
-    data.rename(columns={'Energy':'dockingEnergy'}, inplace = True)
-
-    # do we need to drop Ligand column ??
-    data = data.drop('Ligand',1)
-
-    return data
-
-def load_docking_summary_features(filepath):
+def load_protein_molecular_features(filepath):
     data = pd.read_csv(filepath)
 
     # extract protein name from Ligand and store it in new column
@@ -165,71 +132,31 @@ def load_docking_summary_features(filepath):
     # extract molecule name from Ligand and store it in new column
     data['moleculeName'] = data['Filename'].str.extract('((?<=cluster\d_)\w+)', expand=True)
 
-    columns = ['proteinName', 'moleculeName', 'avg_gauss1', 'avg_gauss2', 'avg_repulsion', 'avg_hydrophobic', 'avg_hydrogen', 'Model1.gauss1', 'Model1.gauss2', 'Model1.repulsion', 'Model1.hydrophobic', 'Model1.hydrogen', 'label']
+    # colunms' name to keep
+    columns = ['proteinName', 'moleculeName', 'dockingEnergy', 'mmgbsaEnergy', 'avg_gauss1', 'avg_gauss2',
+               'avg_repulsion', 'avg_hydrophobic', 'avg_hydrogen', 'Model1.gauss1', 'Model1.gauss2', 'Model1.repulsion',
+               'Model1.hydrophobic', 'Model1.hydrogen', 'label']
+
     data = data[columns]
 
     return data
 
-def load_protein_features_2struc(filepath):
+
+def load_protein_features(filepath):
     '''
         reads protein_features_2struc
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
-    data = pd.read_csv(filepath,delimiter=',')
+        :param filepath: path to the input file
+        :return: pandas DataFrame
+        '''
+    data = pd.read_csv(filepath, delimiter=',')
 
     # rename the first column to use it as key in the merge
-    data.rename(columns={'Cluster_Name':'proteinName'}, inplace = True)
-    print data.index.name
 
+    if ((list(data.columns.values))[0] == 'Cluster_Name'):  # protein_features_2struc.csv
+        data.rename(columns={'Cluster_Name': 'proteinName'}, inplace=True)
+    elif ((list(data.columns.values))[0] == 'cluster_name'):  # protein_features_coach_avg.csv
+        data.rename(columns={'cluster_name': 'proteinName'}, inplace=True)
     return data
 
-def load_protein_features_coach_avg(filepath):
-    '''
-        reads protein_features_coach_avg
-    :param filepath: path to the input file
-    :return: pandas DataFrame
-    '''
-    data = pd.read_csv(filepath,delimiter=',')
-
-    # rename the first column to use it as key in the merge
-    data.rename(columns={'cluster_name':'proteinName'}, inplace = True)
-    return data
-
-def load_dat(filepath):
-    '''
-        Loads VINA results
-
-    :param filepath: path to file containing data
-    :return: a pandas dataframe of VINA results
-    '''
-    file = open(filepath)
-    feature_list = {}
-    i = 0
-    j = 0
-
-    for line in file.readlines():
-        if line.find("TOTAL") != -1 and line.find("DELTA") == -1:
-            line = line.strip('\n')
-            line = line.split(" ")
-            line = filter(lambda x: len(x) >0,line)
-            value = float(line[1])
-            line[0] = line[0]+str(i)
-            col_name = line[0]
-            feature_list[col_name] = value
-            i +=1
-
-        elif line.find("TOTAL") != -1 and line.find("DELTA") != -1:
-            line = line.strip('\n')
-            line = line.split(" ")
-            line = filter(lambda x: len(x) > 0, line)
-            line[1] = line[1]+str(j)
-            col_name = line[0]+line[1]
-            value = float(line[2])
-            feature_list[col_name] = value
-            j+=1
-
-    df = pd.DataFrame([feature_list])
-    return df
 
 read_input_files()
