@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description="Process files containing protein b
 
 parser.add_argument('--p', type=str, nargs='+', help="list paths of files containing protein features")
 
-parser.add_argument('--f', type=str, help="list paths of files containing protein-molecular compound features")
+parser.add_argument('--pm', type=str, help="list paths of files containing protein-molecular compound features")
 
 parser.add_argument('--m', type=str, help="file containing molecular descriptors")
 
@@ -26,32 +26,29 @@ def read_input_files():
     # do a pairwise merge (inner join) for each dataframe in the dataframe list
     df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName"]), df_pro_list)
 
-    print df_agg_pro.shape
 
     # read protein-molecular features file
-    pro_drug_df = parse_file(args.f)
+    pro_drug_df = parse_file(args.pm)
 
-    print pro_drug_df.shape
 
     # merge protein-molecular features with protein features
     pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
 
-    print pro_drug_all_df.shape
 
     # read molecular features file
     mol_df = parse_file(args.m)
 
-    print mol_df.shape
 
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
     output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
 
-    print output_df.shape
 
-    # output the aggregated dataframe to .csv
-    # TODO: fix the formatting of the output file to have the keys justified to the left and data following on the right
-
+    # output the aggregated dataframe to .csv, remove the header
     output_df.to_csv('ml_pro_features.csv', index=False)
+
+    #print type(output_df)
+
+    #print output_df.columns.values()
 
 
 def parse_file(filepath):
