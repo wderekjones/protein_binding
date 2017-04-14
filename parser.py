@@ -45,7 +45,7 @@ def read_input_files():
 
     # drop the labels from the features dataframe
     output_df.drop(["label"],axis = 1)
-    # output the aggregated dataframe to .csv, remove the header
+    # output the aggregated dataframe to .csv
     output_df.to_csv('ml_pro_features.csv', index=False)
     labels_df.to_csv('ml_pro_labels.csv')
 
