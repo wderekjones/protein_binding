@@ -4,7 +4,7 @@ A script that collects various features from multiple input files and outputs a 
 
 In order to run the parser:
 
-> python parser.py --p paths/to/protein_features -m /path/to/molec_descriptors --pm paths/to/protein/molec/features --feats /path/to/molec_features_list
+> python parser.py --p paths/to/protein_features --m /path/to/molec_descriptors --pm paths/to/protein/molec/features --feats /path/to/molec_features_list
 
 where:
 
