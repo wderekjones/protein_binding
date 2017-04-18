@@ -2,8 +2,6 @@ import argparse
 
 import pandas as pd
 
-import math
-
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
 parser.add_argument('--p', type=str, nargs='+', help="list paths of files containing protein features")
@@ -38,8 +36,6 @@ def read_input_files():
     pro_drug_df['moleculeName'] = pro_drug_df['moleculeName'].apply(lambda x: x.lower())
     pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
 
-
-
     # read molecular features file
     mol_df = parse_file(args.m)
 
@@ -51,10 +47,11 @@ def read_input_files():
     labels_df = output_df[["proteinName", "moleculeName", "label"]]
 
     # drop the labels from the features dataframe
-    output_df.drop(["label"],axis = 1)
+    output_df.drop(["label"], axis=1)
     # output the aggregated dataframe to .csv
     output_df.to_csv('ml_pro_features.csv', index=False)
     labels_df.to_csv('ml_pro_labels.csv')
+
 
 def parse_file(filepath):
     '''
