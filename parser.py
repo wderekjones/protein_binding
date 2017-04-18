@@ -21,22 +21,25 @@ def read_input_files():
     # for each input file of protein features, load the dataframe then append to the dataframe list
     for path in args.p:
         df = parse_file(path)
+        df['proteinName'] = df['proteinName'].apply(lambda x: x.lower())
         df_pro_list.append(df)
 
     # do a pairwise merge (inner join) for each dataframe in the dataframe list
     df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName"]), df_pro_list)
 
-
     # read protein-molecular features file
     pro_drug_df = parse_file(args.pm)
 
-
     # merge protein-molecular features with protein features
+    df_agg_pro['proteinName'] = df_agg_pro['proteinName'].apply(lambda x: x.lower())
+    pro_drug_df['proteinName'] = pro_drug_df['proteinName'].apply(lambda x: x.lower())
+    pro_drug_df['moleculeName'] = pro_drug_df['moleculeName'].apply(lambda x: x.lower())
     pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
-
 
     # read molecular features file
     mol_df = parse_file(args.m)
+
+    mol_df['moleculeName'] = mol_df['moleculeName'].apply(lambda x: x.lower())
 
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
     output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
@@ -44,10 +47,11 @@ def read_input_files():
     labels_df = output_df[["proteinName", "moleculeName", "label"]]
 
     # drop the labels from the features dataframe
-    output_df.drop(["label"],axis = 1)
+    output_df.drop(["label"], axis=1)
     # output the aggregated dataframe to .csv
     output_df.to_csv('ml_pro_features.csv', index=False)
     labels_df.to_csv('ml_pro_labels.csv')
+
 
 def parse_file(filepath):
     '''
