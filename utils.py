@@ -4,7 +4,7 @@ import numpy as np
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Purples):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
