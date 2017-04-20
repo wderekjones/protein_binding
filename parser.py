@@ -1,8 +1,7 @@
 import argparse
+from functools import reduce
 
 import pandas as pd
-
-from functools import reduce
 
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
@@ -66,7 +65,7 @@ def parse_file(filepath):
     elif filepath.find('protein_features') != -1:  # protein_features_coach_avg and protein_features_2struc
         data = load_protein_features(filepath)
     else:
-        print ('File not supported')
+        print('File not supported')
 
     return data
 
@@ -85,7 +84,7 @@ def load_molecular_descriptors(filepath, descriptorsListFile=None):
     # rename duplicated moleculars
     for index, row in data.iterrows():
         molName = data.get_value(index, 'NAME', takeable=False)
-        if (molName.find('_') == -1):
+        if molName.find('_') == -1:
             duplicatedMol = data.loc[data['NAME'] == molName]
             rowNum = len(duplicatedMol.index)
 
@@ -100,17 +99,14 @@ def load_molecular_descriptors(filepath, descriptorsListFile=None):
                         data.set_value(innerIndex, 'NAME', newMolName)
 
     # select descriptorsList if there is
-    if (descriptorsListFile != None):
+    if descriptorsListFile != None:
         with open(descriptorsListFile) as f:
             descriptorsList = f.read().splitlines()
 
         descriptorsList.append('NAME')
 
-        # Doesn't work becuase may some columns are not exist in the data when we use outputExclusionMolecularDescriptors.txt
-        # data = data[descriptorsList]
-
         for index, column in data.iteritems():  # index =  column name
-            if (index not in descriptorsList):
+            if index not in descriptorsList:
                 data.drop(index, axis=1, inplace=True)
 
     # rename the second column to use it as key in the merge
@@ -155,9 +151,9 @@ def load_protein_features(filepath):
 
     # rename the first column to use it as key in the merge
 
-    if ((list(data.columns.values))[0] == 'Cluster_Name'):  # protein_features_2struc.csv
+    if (list(data.columns.values))[0] == 'Cluster_Name':  # protein_features_2struc.csv
         data.rename(columns={'Cluster_Name': 'proteinName'}, inplace=True)
-    elif ((list(data.columns.values))[0] == 'cluster_name'):  # protein_features_coach_avg.csv
+    elif (list(data.columns.values))[0] == 'cluster_name':  # protein_features_coach_avg.csv
         data.rename(columns={'cluster_name': 'proteinName'}, inplace=True)
 
     # convert elements in the key column to lowercase to prevent confusion
