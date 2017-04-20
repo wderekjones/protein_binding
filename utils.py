@@ -1,5 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+
+
+
+
+def make_data(data_path):
+    data = pd.read_csv(data_path,header=False)
+    data = data.as_matrix()
+    return data
+
+def make_labels(labels_path):
+    labels = pd.read_csv(labels_path, header=False)
+    labels = labels.as_matrix()
+    labels = labels[:,2]
+    return labels
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
