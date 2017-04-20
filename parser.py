@@ -2,6 +2,8 @@ import argparse
 
 import pandas as pd
 
+from functools import reduce
+
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
 parser.add_argument('--p', type=str, nargs='+', help="list paths of files containing protein features")
@@ -44,8 +46,8 @@ def read_input_files():
     output_df.drop(["label"], axis=1, inplace=True)
 
     # output the aggregated dataframes to .csv
-    output_df.to_csv('ml_pro_features.csv', index=False)
-    labels_df.to_csv('ml_pro_labels.csv')
+    output_df.to_csv('data/ml_pro_features.csv', index=False)
+    labels_df.to_csv('data/ml_pro_labels.csv')
 
 
 def parse_file(filepath):
@@ -64,7 +66,7 @@ def parse_file(filepath):
     elif filepath.find('protein_features') != -1:  # protein_features_coach_avg and protein_features_2struc
         data = load_protein_features(filepath)
     else:
-        print 'File not supported'
+        print ('File not supported')
 
     return data
 
