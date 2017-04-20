@@ -44,9 +44,13 @@ def read_input_files():
     # drop the labels from the features dataframe
     output_df.drop(["label"], axis=1, inplace=True)
 
+    output_df = pd.merge(output_df,labels_df)
+
+    output_df.drop(["proteinName","moleculeName"],axis=1,inplace = True)
+
     # output the aggregated dataframes to .csv
-    output_df.to_csv('data/ml_pro_features.csv', index=False)
-    labels_df.to_csv('data/ml_pro_labels.csv', index=False)
+    output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
+    #labels_df.to_csv('data/ml_pro_labels.csv', index=False)
 
 
 def parse_file(filepath):

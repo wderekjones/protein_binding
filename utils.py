@@ -2,19 +2,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+'''
+need to select a subset of the data, make sure not to get the labels and examples confused out of order'''
 
 
-
-def make_data(data_path):
-    data = pd.read_csv(data_path,header=False)
+def make_data(data_path,sample_size):
+    data = pd.read_csv(data_path)
+    data = data.sample(sample_size)
     data = data.as_matrix()
-    return data
-
-def make_labels(labels_path):
-    labels = pd.read_csv(labels_path, header=False)
-    labels = labels.as_matrix()
-    labels = labels[:,2]
-    return labels
+    labels = data[:,(data.shape[1]-1)]
+    return data,labels
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
