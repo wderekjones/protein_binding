@@ -46,8 +46,8 @@ def read_input_files():
     output_df.drop(["label"], axis=1, inplace=True)
 
     # output the aggregated dataframes to .csv
-    output_df.to_csv('data/ml_pro_features.csv', index=False)
-    labels_df.to_csv('data/ml_pro_labels.csv')
+    output_df.to_csv('/data/ml_pro_features.csv', index=False)
+    labels_df.to_csv('/data/ml_pro_labels.csv', index=False)
 
 
 def parse_file(filepath):
