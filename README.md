@@ -1,4 +1,8 @@
 # protein_binding
+
+This repository contains a collection of python scripts for computing a drug-protein binding classification.
+
+## Parser
 A script that collects various features from multiple input files and outputs a file of protein, drug, protein-drug pair features as specified by the user. 
 
 
