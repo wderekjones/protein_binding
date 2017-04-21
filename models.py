@@ -5,8 +5,8 @@ from sklearn.preprocessing.imputation import Imputer
 from utils import *
 
 # need to make sure that each class is included
-X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",200)
-X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",200)
+X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",3000)
+X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",3000)
 
 
 print (y_p)
@@ -17,7 +17,7 @@ y = combine_positive_negative_data(y_n,y_p)
 
 imputer = Imputer()
 X = imputer.fit_transform(X,y)
-X_train,X_test,y_train,y_test = train_test_split(X,y)
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.5)
 rforest = RandomForestClassifier(n_estimators=10,class_weight='balanced',oob_score=True)
 rforest.fit(X_train, y_train)
 preds = rforest.predict(X_test)
