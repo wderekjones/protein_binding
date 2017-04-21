@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing.imputation import Imputer
 import numpy as np
 import pandas as pd
 
@@ -66,3 +68,15 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
+
+def feature_selection():
+    X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",194991)
+    X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",4760)
+    X = combine_positive_negative_data(X_n,X_p)
+    y = combine_positive_negative_data(y_n,y_p)
+    imputer = Imputer()
+    X = imputer.fit_transform(X)
+
+    feat_select = VarianceThreshold(threshold=1.0)
+    feat = feat_select.fit_transform(X)
+    return feat
