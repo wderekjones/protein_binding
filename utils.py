@@ -9,9 +9,38 @@ need to select a subset of the data, make sure not to get the labels and example
 def make_data(data_path,sample_size):
     data = pd.read_csv(data_path)
     data = data.sample(sample_size)
+    data.replace(to_replace='na',value=np.nan,inplace=True)
+    data = data.apply(pd.to_numeric)
     data = data.as_matrix()
     labels = data[:,(data.shape[1]-1)]
     return data,labels
+
+
+def get_positive_data(data_path,sample_size):
+    data = pd.read_csv(data_path)
+    data = data.loc[data.iloc[:, -1] == 1]
+    data = data.sample(sample_size)
+    data.replace(to_replace='na', value=np.nan, inplace=True)
+    data = data.apply(pd.to_numeric)
+    data = data.as_matrix()
+    labels = data[:, (data.shape[1] - 1)]
+    return data, labels
+
+
+def get_negative_data(data_path,sample_size):
+    data = pd.read_csv(data_path)
+    data = data.loc[data.iloc[:, -1] == 0]
+    data = data.sample(sample_size)
+    data.replace(to_replace='na', value=np.nan, inplace=True)
+    data = data.apply(pd.to_numeric)
+    data = data.as_matrix()
+    labels = data[:, (data.shape[1] - 1)]
+    return data, labels
+
+def combine_positive_negative_data(positive,negative):
+    data = np.concatenate([positive,negative],axis=0)
+    return data
+
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
