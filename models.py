@@ -5,8 +5,8 @@ from sklearn.preprocessing.imputation import Imputer
 from utils import *
 
 # need to make sure that each class is included
-X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",2)
-X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",2)
+X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",200)
+X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",200)
 
 
 print (y_p)
