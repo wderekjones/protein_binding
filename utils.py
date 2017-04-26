@@ -1,24 +1,21 @@
 import matplotlib.pyplot as plt
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.preprocessing.imputation import Imputer
 import numpy as np
 import pandas as pd
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing.imputation import Imputer
 
-'''
-need to select a subset of the data, make sure not to get the labels and examples confused out of order'''
 
-
-def make_data(data_path,sample_size):
+def make_data(data_path, sample_size):
     data = pd.read_csv(data_path)
     data = data.sample(sample_size)
-    data.replace(to_replace='na',value=np.nan,inplace=True)
+    data.replace(to_replace='na', value=np.nan, inplace=True)
     data = data.apply(pd.to_numeric)
     data = data.as_matrix()
-    labels = data[:,(data.shape[1]-1)]
-    return data,labels
+    labels = data[:, (data.shape[1] - 1)]
+    return data, labels
 
 
-def get_positive_data(data_path,sample_size):
+def get_positive_data(data_path, sample_size):
     data = pd.read_csv(data_path)
     data = data.loc[data.iloc[:, -1] == 1]
     data = data.sample(sample_size)
@@ -29,7 +26,7 @@ def get_positive_data(data_path,sample_size):
     return data, labels
 
 
-def get_negative_data(data_path,sample_size):
+def get_negative_data(data_path, sample_size):
     data = pd.read_csv(data_path)
     data = data.loc[data.iloc[:, -1] == 0]
     data = data.sample(sample_size)
@@ -39,8 +36,9 @@ def get_negative_data(data_path,sample_size):
     labels = data[:, (data.shape[1] - 1)]
     return data, labels
 
-def combine_positive_negative_data(positive,negative):
-    data = np.concatenate([positive,negative],axis=0)
+
+def combine_positive_negative_data(positive, negative):
+    data = np.concatenate([positive, negative], axis=0)
     return data
 
 
@@ -56,8 +54,8 @@ def plot_confusion_matrix(cm, classes,
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45,fontsize=2)
-    plt.yticks(tick_marks, classes,fontsize=2)
+    plt.xticks(tick_marks, classes, rotation=45, fontsize=2)
+    plt.yticks(tick_marks, classes, fontsize=2)
 
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -69,11 +67,12 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
+
 def feature_selection():
-    X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv",194991)
-    X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv",4760)
-    X = combine_positive_negative_data(X_n,X_p)
-    y = combine_positive_negative_data(y_n,y_p)
+    X_n, y_n = get_negative_data("data/ml_pro_features_labels.csv", 194991)
+    X_p, y_p = get_positive_data("data/ml_pro_features_labels.csv", 4760)
+    X = combine_positive_negative_data(X_n, X_p)
+    y = combine_positive_negative_data(y_n, y_p)
     imputer = Imputer()
     X = imputer.fit_transform(X)
 
