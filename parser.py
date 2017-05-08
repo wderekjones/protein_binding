@@ -1,7 +1,10 @@
 import argparse
 from functools import reduce
+import numpy as np
 
 import pandas as pd
+
+#TODO: wrap the parser inside of a function
 
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
@@ -46,7 +49,7 @@ def read_input_files():
 
     output_df = pd.merge(output_df,labels_df)
 
-    output_df.drop(["proteinName","moleculeName"],axis=1,inplace = True)
+    output_df.drop(["proteinName","moleculeName" ],axis=1,inplace = True)
 
     # output the aggregated dataframes to .csv
     output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
@@ -142,6 +145,10 @@ def load_protein_molecular_features(filepath):
     data['proteinName'] = data['proteinName'].apply(lambda x: x.lower())
     data['moleculeName'] = data['moleculeName'].apply(lambda x: x.lower())
 
+    # create column for cluster number
+    cluster_numbers = data["proteinName"].replace(to_replace='.*_cluster', value="", regex=True)
+    data.insert(2, 'cluster_number', value=cluster_numbers)
+
     return data
 
 
@@ -162,6 +169,11 @@ def load_protein_features(filepath):
 
     # convert elements in the key column to lowercase to prevent confusion
     data['proteinName'] = data['proteinName'].apply(lambda x: x.lower())
+
+    # create column for cluster number
+    cluster_numbers = data["proteinName"].replace(to_replace='.*_cluster', value="", regex=True)
+    data.insert(1, 'cluster_number', value=cluster_numbers)
+
     return data
 
 
