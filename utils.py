@@ -23,6 +23,9 @@ def load_data(data_path,sample_size,mode=None):
     labels = data[:, (data.shape[1] - 1)]
     data = data[:,0:-2]
 
+    imputer = Imputer()
+    data = imputer.fit_transform(data, labels)
+
     return data, labels
 
 

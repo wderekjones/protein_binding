@@ -1,10 +1,7 @@
 import argparse
-from functools import reduce
-import numpy as np
-
 import pandas as pd
 
-#TODO: wrap the parser inside of a function
+from functools import reduce
 
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
@@ -27,33 +24,22 @@ def read_input_files():
         df = parse_file(path)
         df_pro_list.append(df)
 
-    # do a pairwise merge (inner join) for each dataframe in the dataframe list
     df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName"]), df_pro_list)
-
-    # read protein-molecular features file
     pro_drug_df = parse_file(args.pm)
 
     # merge protein-molecular features with protein features
     pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
-
-    # read molecular features file
     mol_df = parse_file(args.m)
 
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
     output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
-
     labels_df = output_df[["proteinName", "moleculeName", "label"]]
 
     # drop the labels from the features dataframe
     output_df.drop(["label"], axis=1, inplace=True)
-
     output_df = pd.merge(output_df,labels_df)
-
-    output_df.drop(["proteinName","moleculeName" ],axis=1,inplace = True)
-
-    # output the aggregated dataframes to .csv
+    output_df.drop(["proteinName","moleculeName"],axis=1,inplace = True)
     output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
-    #labels_df.to_csv('data/ml_pro_labels.csv', index=False)
 
 
 def parse_file(filepath):
