@@ -73,6 +73,7 @@ def load_molecular_descriptors(filepath, descriptorsListFile=None):
         '''
 
     data = pd.read_csv(filepath, delimiter='\t', low_memory=False)
+    data.drop(["No."], axis=1, inplace=True)
 
     # rename duplicated moleculars
     for index, row in data.iterrows():
