@@ -1,6 +1,6 @@
 import argparse
 import pandas as pd
-
+import h5py
 from functools import reduce
 
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
@@ -37,9 +37,21 @@ def read_input_files():
 
     # drop the labels from the features dataframe
     output_df.drop(["label"], axis=1, inplace=True)
-    output_df = pd.merge(output_df,labels_df)
-    output_df.drop(["proteinName","moleculeName"],axis=1,inplace = True)
+    output_df = pd.merge(output_df, labels_df)
+    output_df.drop(["proteinName", "moleculeName"], axis=1, inplace=True)
+    save_to_hdf5(output_df)
     output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
+
+
+def save_to_hdf5(data_frame):
+    output_file = h5py.File("data/ml_pro_features_labels.h5", "w")
+    data_frame = data_frame.convert_objects(convert_numeric=True)
+
+    for feature in data_frame:
+        feature_list = data_frame[feature].tolist()
+        output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=feature_list)
+
+    output_file.close()
 
 
 def parse_file(filepath):
@@ -105,6 +117,8 @@ def load_molecular_descriptors(filepath, descriptorsListFile=None):
 
     # rename the second column to use it as key in the merge
     data.rename(columns={'NAME': 'moleculeName'}, inplace=True)
+
+    # data.drop(["No."], axis=1, inplace=True)
 
     # convert keys to lowercase to prevent confusion
     data['moleculeName'] = data['moleculeName'].apply(lambda x: x.lower())

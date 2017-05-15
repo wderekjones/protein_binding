@@ -2,12 +2,12 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, roc_curve
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing.imputation import Imputer
 
 
-def load_data(data_path,sample_size,mode=None):
+def load_data(data_path, sample_size=None, mode=None):
     data = pd.read_csv(data_path)
 
     if mode is 0:
@@ -16,12 +16,15 @@ def load_data(data_path,sample_size,mode=None):
     elif mode is 1:
         data = data.loc[data.iloc[:, -1] == 1]
 
+    if sample_size is None:
+        sample_size = data.shape[0]
+
     data = data.sample(sample_size)
     data.replace(to_replace='na', value=np.nan, inplace=True)
     data = data.apply(pd.to_numeric)
     data = data.as_matrix()
     labels = data[:, (data.shape[1] - 1)]
-    data = data[:,0:-2]
+    data = data[:, 0:-2]
 
     imputer = Imputer()
     data = imputer.fit_transform(data, labels)
@@ -43,15 +46,16 @@ def plot_confusion_matrix(cm, classes,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
-
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
@@ -76,20 +80,23 @@ def feature_selection():
     feat = feat_select.fit_transform(X)
     return feat
 
-def training_module(clf,X_train,y_train,X_test,y_test):
-    clf_dict = {}
-    clf.fit(X_train, y_train)
-    preds = clf.predict(X_test)
-    # get the unique labels from both training and testing data
-    labels = np.unique(np.hstack(y_train,y_test))
-    confusion = confusion_matrix(y_test, preds, labels=labels)
-    accuracy = accuracy_score(y_test, preds)
-    f1 = f1_score(y_test, preds)
 
-    clf_dict["labels"] = labels
-    clf_dict["preds"] = preds
-    clf_dict["confusion"] = confusion
-    clf_dict["accuracy"] = accuracy
-    clf_dict["f1"] = f1
+def generate_report(report_title, clf, preds, y_test):
+    '''
+        Takes a classifier object and evaluates model performance, generates figures and a table of results
+    :param clf: 
+    :param X: 
+    :param y: 
+    :return: 
+    '''
 
-    return clf_dict
+    output_file = open("results/" + report_title + ".txt", "w")
+    output_file.write(report_title + "\n")
+    output_file.write(classification_report(y_test, preds, target_names=["Class 0", "Class 1"], digits=4))
+    output_file.write("\n" + clf.__str__())
+    output_file.close()
+
+    confusion = confusion_matrix(y_test, preds)
+    plt.clf()
+    plot_confusion_matrix(confusion, classes=[0, 1], title=report_title)
+    plt.savefig("results/" + report_title + ".png")
