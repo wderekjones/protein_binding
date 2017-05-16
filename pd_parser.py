@@ -3,6 +3,9 @@ import pandas as pd
 import h5py
 from functools import reduce
 
+
+#TODO: add metadata output
+
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
 parser.add_argument('--p', type=str, nargs='+', help="list paths of files containing protein features")
@@ -41,6 +44,9 @@ def read_input_files():
     output_df.drop(["proteinName", "moleculeName"], axis=1, inplace=True)
     save_to_hdf5(output_df)
     output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
+    output_df_metadata = open("data/ml_pro_features_labels.txt","w")
+    output_df_metadata.write(str(list(output_df)))
+    output_df_metadata.close()
 
 
 def save_to_hdf5(data_frame):

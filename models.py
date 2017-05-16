@@ -8,9 +8,15 @@ from utils import *
 
 random_state = 0
 
-X, y = load_data("data/ml_pro_features_labels.csv")
+X_p, y_p = load_data("data/ml_pro_features_labels.csv", 4000, mode=1)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+X_n, y_n = load_data("data/ml_pro_features_labels.csv", 100000, mode=0)
+X = combine_positive_negative_data(X_n, X_p)
+y = combine_positive_negative_data(y_n, y_p)
+
+# y = to_categorical(y)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 rforest = RandomForestClassifier(n_estimators=10, random_state=random_state)
 rforest.fit(X_train, y_train)
