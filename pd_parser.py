@@ -1,10 +1,10 @@
 import argparse
 import pandas as pd
+import numpy as np
 import h5py
 from functools import reduce
 
-
-#TODO: add metadata output
+# TODO: add metadata output
 
 parser = argparse.ArgumentParser(description="Process files containing protein binding affinity features")
 
@@ -27,24 +27,35 @@ def read_input_files():
         df = parse_file(path)
         df_pro_list.append(df)
 
-    df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName"]), df_pro_list)
+    # find out hwo to remove duplicated cluster_number columns
+    df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName","cluster_number"]),df_pro_list)
+    del df_pro_list
+
     pro_drug_df = parse_file(args.pm)
 
     # merge protein-molecular features with protein features
-    pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how='left', on='proteinName')
+    pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how="left", on=['proteinName',"cluster_number"])
+    del pro_drug_df
+    del df_agg_pro
+
     mol_df = parse_file(args.m)
 
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
     output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
+    del pro_drug_all_df
+    del mol_df
+
     labels_df = output_df[["proteinName", "moleculeName", "label"]]
 
-    # drop the labels from the features dataframe
+    # write the output data as .h5/.csv and the output metadata as .txt
     output_df.drop(["label"], axis=1, inplace=True)
     output_df = pd.merge(output_df, labels_df)
     output_df.drop(["proteinName", "moleculeName"], axis=1, inplace=True)
+    output_df = output_df.replace(to_replace=("", " "), value=np.nan)
+    output_df.columns = [x.replace("/", "_") for x in output_df.columns]
     save_to_hdf5(output_df)
     output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
-    output_df_metadata = open("data/ml_pro_features_labels.txt","w")
+    output_df_metadata = open("data/ml_pro_features_labels_metadata.txt", "w")
     output_df_metadata.write(str(list(output_df)))
     output_df_metadata.close()
 
@@ -54,7 +65,7 @@ def save_to_hdf5(data_frame):
     data_frame = data_frame.convert_objects(convert_numeric=True)
 
     for feature in data_frame:
-        feature_list = data_frame[feature].tolist()
+        feature_list = np.asarray(data_frame[feature].tolist())
         output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=feature_list)
 
     output_file.close()

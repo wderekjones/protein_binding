@@ -49,9 +49,9 @@ def recall(y_true, y_pred):
     return recall
 
 
-X_p, y_p = load_data("data/ml_pro_features_labels.csv", 4000, mode=1)
+X_p, y_p = load_data_csv("data/ml_pro_features_labels.csv", 4000, mode=1)
 
-X_n, y_n = load_data("data/ml_pro_features_labels.csv", 100000, mode=0)
+X_n, y_n = load_data_csv("data/ml_pro_features_labels.csv", 100000, mode=0)
 X = combine_positive_negative_data(X_n, X_p)
 y = combine_positive_negative_data(y_n, y_p)
 
