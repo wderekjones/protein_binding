@@ -83,7 +83,7 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None):
 
 
 def combine_positive_negative_data(positive, negative):
-    '''deprecating this soon'''
+    #TODO: take a list of positives and negatives as args
     data = np.concatenate([positive, negative], axis=0)
     return data
 
