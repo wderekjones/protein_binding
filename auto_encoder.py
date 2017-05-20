@@ -1,3 +1,100 @@
+from keras.layers import Input, Dense, BatchNormalization
+from keras.models import Model
+from keras import objectives
+from keras import optimizers
+from keras.callbacks import ModelCheckpoint
+from keras.layers.advanced_activations import LeakyReLU, PReLU
+from sklearn.preprocessing import normalize
+from utils import *
+#from plot_checkpoint import Plot_Reduction
+import matplotlib.pyplot as plt
+import time
+plt.style.use('ggplot')
+
+time_stamp = time.clock()
+
+
+X_,y_ = load_data_h5("data/ml_pro_features_labels.h5")
+X_ = normalize(X_)
+
+num_epochs = 100
+encoding_dim = 2
+learning_rate = 1e-3
+
+input_data = Input(shape=(189,))
+
+encoded = BatchNormalization()(input_data)
+encoded = Dense(100)(encoded)
+encoded = PReLU()(encoded)
+encoded = Dense(50)(encoded)
+encoded = PReLU()(encoded)
+encoded = Dense(25)(encoded)
+encoded = PReLU()(encoded)
+encoded = Dense(encoding_dim)(encoded)
+encoded = PReLU()(encoded)
+
+decoded = Dense(25)(encoded)
+decoded = PReLU()(decoded)
+decoded = Dense(50)(decoded)
+decoded = PReLU()(decoded)
+decoded = Dense(100)(decoded)
+decoded = PReLU()(decoded)
+decoded = Dense(189)(decoded)
+decoded = PReLU()(decoded)
+
+autoencoder = Model(input_data, decoded)
+print (autoencoder.summary())
+
+encoder = Model(input_data, encoded)
+print (encoder.summary())
+
+encoded_input = Input(shape=(encoding_dim,))
+
+
+decoder = Model(encoded_input,autoencoder.layers[-1](autoencoder.layers[-2](autoencoder.layers[-3](autoencoder.layers[-4](
+    autoencoder.layers[-5](autoencoder.layers[-6](autoencoder.layers[-7](autoencoder.layers[-8](encoded_input)))))))))
+
+print (decoder.summary())
+
+
+autoencoder.compile(optimizer=optimizers.rmsprop(lr=learning_rate),loss=objectives.mean_squared_error)
+
+
+autoencoder.fit(X_,X_,epochs=num_epochs,batch_size=64,shuffle=True,validation_split=0.2,callbacks=[ModelCheckpoint(str(time.clock())+"_model.h5")])
+
+reduced_x = encoder.predict(X_)
+plt.clf()
+plt.scatter(reduced_x[:,0],reduced_x[:,1],c = y_,s=10)
+plt.savefig(str(time_stamp)+"_final_dim_reduction.png")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -80,10 +177,10 @@ _, logits = P(z_sample)
 X_samples, _ = P(z)
 
 # E[log P(X|z)]
-recon_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=X), 1)
+recon_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=X), 1)
 # D_KL(Q(z|X) || P(z|X)); calculate in closed form as both dist. are Gaussian
-#kl_loss = 0.5 * tf.reduce_sum(tf.exp(z_logvar) + z_mu**2 - 1. - z_logvar, 1)
-kl_loss = tf.reduce_mean(-tf.nn.softmax_cross_entropy_with_logits(labels=z_mu, logits = z_logvar))
+kl_loss = 0.5 * tf.reduce_mean(tf.exp(z_logvar) + z_mu**2 - 1. - z_logvar, 1)
+#kl_loss = tf.reduce_mean(-tf.nn.softmax_cross_entropy_with_logits(labels=z_mu, logits = z_logvar))
 
 # VAE loss
 vae_loss = tf.reduce_mean(recon_loss + kl_loss)
@@ -105,17 +202,17 @@ X_p,_ = load_data_h5("data/ml_pro_features_labels.h5",mode=1)
 X_p = normalize(X_p)
 mb_sample_pos = np.random.choice(X_p.shape[0], int(mb_size / 2), replace=False)
 
-for it in range(1000000):
+for it in range(2000000):
     mb_sample_neg = np.random.choice(X_n.shape[0],int(mb_size/2),replace=False)
     X_mb = np.vstack((X_n[mb_sample_neg],X_p[mb_sample_pos]))
     _, loss = sess.run([solver, vae_loss], feed_dict={X: X_mb})
     kl_ = sess.run(kl_loss,feed_dict={X:X_mb})
     if it % 1000 == 0:
-        print('Iter: {}'.format(it),'\t --- \t','Loss: {:.4}'. format(loss))#,'\t','-----','kl loss: ',np.mean(kl_,axis=0))
+        print('Iter: {}'.format(it),'\t --- \t','Loss: {:.4}'. format(loss),'\t','-----','kl loss: ',np.mean(kl_))
 
     if it % 100000 == 0:
         mb_sample_pos = np.random.choice(X_p.shape[0], int(mb_size / 2), replace=False)
-
+'''
 
 '''from keras.layers import Input, Dense
 from keras.models import Model
