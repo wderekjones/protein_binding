@@ -74,7 +74,7 @@ def read_input_files():
 
 def save_to_hdf5(data_frame):
     output_file = h5py.File("data/ml_pro_features_labels.h5", "w", libver='latest')
-    data_frame.convert_objects(convert_numeric=True, inplace=True)
+    data_frame = data_frame.convert_objects(convert_numeric=True)
 
     for feature in data_frame:
         output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=data_frame[feature].tolist())
