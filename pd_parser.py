@@ -44,6 +44,10 @@ def read_input_files():
                                          on=['proteinName', "cluster_number"])
         del protein_features
 
+    else:
+        protein_drug_features = protein_features
+        del protein_features
+
     if args.m is not None:
         drug_features = parse_file(args.m)
 
@@ -72,8 +76,8 @@ def save_to_hdf5(data_frame):
     data_frame = data_frame.convert_objects(convert_numeric=True)
 
     for feature in data_frame:
-        feature_list = np.asarray(data_frame[feature].tolist())
-        output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=feature_list)
+        #feature_list = np.asarray(data_frame[feature].tolist())
+        output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=data_frame[feature])
         data_frame.drop([feature],axis=1)
 
     output_file.close()
