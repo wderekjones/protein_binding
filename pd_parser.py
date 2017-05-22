@@ -2,6 +2,7 @@ import argparse
 import pandas as pd
 import numpy as np
 import h5py
+import time
 from functools import reduce
 
 # TODO: add metadata output
@@ -19,46 +20,52 @@ args = parser.parse_args()
 
 
 def read_input_files():
+    start_time = time.clock()
     # create an empty list to store the dataframes of protein features
     df_pro_list = []
+    protein_features = pd.DataFrame()
+    drug_features = pd.DataFrame()
+    protein_drug_features = pd.DataFrame()
 
     # for each input file of protein features, load the dataframe then append to the dataframe list
-    for path in args.p:
-        df = parse_file(path)
-        df_pro_list.append(df)
+    if args.p is not None:
+        for path in args.p:
+            df = parse_file(path)
+            df_pro_list.append(df)
 
-    # find out hwo to remove duplicated cluster_number columns
-    df_agg_pro = reduce(lambda x, y: pd.merge(x, y, on=["proteinName","cluster_number"]),df_pro_list)
+        protein_features = reduce(lambda x, y: pd.merge(x, y, on=["proteinName", "cluster_number"]), df_pro_list)
     del df_pro_list
 
-    pro_drug_df = parse_file(args.pm)
+    if args.pm is not None:
+        protein_drug_features = parse_file(args.pm)
 
-    # merge protein-molecular features with protein features
-    pro_drug_all_df = pd.merge(pro_drug_df, df_agg_pro, how="left", on=['proteinName',"cluster_number"])
-    del pro_drug_df
-    del df_agg_pro
+        # merge protein-molecular features with protein features
+        protein_drug_features = pd.merge(protein_drug_features, protein_features, how="left",
+                                         on=['proteinName', "cluster_number"])
+        del protein_features
 
-    mol_df = parse_file(args.m)
+    if args.m is not None:
+        drug_features = parse_file(args.m)
 
     # do a pairwise merge (inner join) of molecular features with all protein-molecular features
-    output_df = pd.merge(pro_drug_all_df, mol_df, on="moleculeName")
-    del pro_drug_all_df
-    del mol_df
+    protein_drug_features = pd.merge(protein_drug_features, drug_features, on="moleculeName")
 
-    labels_df = output_df[["proteinName", "moleculeName", "label"]]
+    del drug_features
 
-    # write the output data as .h5/.csv and the output metadata as .txt
-    output_df.drop(["label"], axis=1, inplace=True)
-    output_df = pd.merge(output_df, labels_df)
-    output_df.drop(["proteinName", "moleculeName"], axis=1, inplace=True)
-    output_df = output_df.replace(to_replace=("", " "), value=np.nan)
-    output_df.columns = [x.replace("/", "_") for x in output_df.columns]
-    save_to_hdf5(output_df)
-    output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
-    output_df_metadata = open("data/ml_pro_features_labels_metadata.txt", "w")
-    output_df_metadata.write(str(list(output_df)))
-    output_df_metadata.close()
+    labels_df = protein_drug_features[["proteinName", "moleculeName", "label"]]
 
+    protein_drug_features.drop(["label"], axis=1, inplace=True)
+    protein_drug_features = pd.merge(protein_drug_features, labels_df)
+    protein_drug_features.drop(["proteinName", "moleculeName"], axis=1, inplace=True)
+    protein_drug_features = protein_drug_features.replace(to_replace=("", " "), value=np.nan)
+    protein_drug_features.columns = [x.replace("/", "_") for x in protein_drug_features.columns]
+    save_to_hdf5(protein_drug_features)
+    protein_drug_features.to_csv('data/ml_pro_features_labels.csv', index=False, header=True)
+    protein_drug_metadata = open("data/ml_pro_features_labels_metadata.txt", "w")
+    protein_drug_metadata.write(str(list(protein_drug_features)))
+    protein_drug_metadata.close()
+
+    print ("Output files generated in ", str(time.clock() - start_time), " seconds.")
 
 def save_to_hdf5(data_frame):
     output_file = h5py.File("data/ml_pro_features_labels.h5", "w")
