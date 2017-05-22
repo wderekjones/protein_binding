@@ -7,6 +7,7 @@ import keras.backend as K
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing.imputation import Imputer
+from functools import reduce
 
 
 def load_data_csv(data_path, sample_size=None, mode=None):
@@ -34,7 +35,7 @@ def load_data_csv(data_path, sample_size=None, mode=None):
     return data, labels
 
 
-def load_data_h5(data_path, sample_size=None, features_list=None, mode=None):
+def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
 
     dataset_size = input_fo["label"].shape[0]
@@ -83,7 +84,11 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None):
 
 
 def combine_positive_negative_data(positive, negative):
-    #TODO: take a list of positives and negatives as args
+    # TODO: take a list of positives and negatives as args
+
+    positive = reduce(lambda x, y: np.concatenate(x, y), positive)
+    negative = reduce(lambda x, y: np.concatenate(x, y), negative)
+
     data = np.concatenate([positive, negative], axis=0)
     return data
 

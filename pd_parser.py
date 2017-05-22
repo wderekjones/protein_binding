@@ -54,7 +54,7 @@ def read_input_files():
     output_df = output_df.replace(to_replace=("", " "), value=np.nan)
     output_df.columns = [x.replace("/", "_") for x in output_df.columns]
     save_to_hdf5(output_df)
-    output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=True)
+    output_df.to_csv('data/ml_pro_features_labels.csv', index=False, header=False)
     output_df_metadata = open("data/ml_pro_features_labels_metadata.txt", "w")
     output_df_metadata.write(str(list(output_df)))
     output_df_metadata.close()
