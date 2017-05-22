@@ -74,6 +74,7 @@ def save_to_hdf5(data_frame):
     for feature in data_frame:
         feature_list = np.asarray(data_frame[feature].tolist())
         output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=feature_list)
+        data_frame.drop([feature],axis=1)
 
     output_file.close()
 
