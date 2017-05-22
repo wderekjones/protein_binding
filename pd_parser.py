@@ -23,9 +23,9 @@ def read_input_files():
     start_time = time.clock()
     # create an empty list to store the dataframes of protein features
     df_pro_list = []
-    protein_features = pd.DataFrame()
+    protein_features = pd.DataFrame(columns=["proteinName", "cluster_number"])
     drug_features = pd.DataFrame()
-    protein_drug_features = pd.DataFrame()
+    protein_drug_features = pd.DataFrame(columns=["proteinName", "cluster_number"])
 
     # for each input file of protein features, load the dataframe then append to the dataframe list
     if args.p is not None:
@@ -51,8 +51,8 @@ def read_input_files():
     if args.m is not None:
         drug_features = parse_file(args.m)
 
-    # do a pairwise merge (inner join) of molecular features with all protein-molecular features
-    protein_drug_features = pd.merge(protein_drug_features, drug_features, on="moleculeName")
+        # do a pairwise merge (inner join) of molecular features with all protein-molecular features
+        protein_drug_features = pd.merge(protein_drug_features, drug_features, on="moleculeName")
 
     del drug_features
 
@@ -69,16 +69,17 @@ def read_input_files():
     protein_drug_metadata.write(str(list(protein_drug_features)))
     protein_drug_metadata.close()
 
-    print ("Output files generated in ", str(time.clock() - start_time), " seconds.")
+    print("Output files generated in ", str(time.clock() - start_time), " seconds.")
+
 
 def save_to_hdf5(data_frame):
     output_file = h5py.File("data/ml_pro_features_labels.h5", "w")
     data_frame = data_frame.convert_objects(convert_numeric=True)
 
     for feature in data_frame:
-        #feature_list = np.asarray(data_frame[feature].tolist())
+        # feature_list = np.asarray(data_frame[feature].tolist())
         output_file.create_dataset(str(feature), [data_frame.shape[0], 1], data=data_frame[feature])
-        data_frame.drop([feature],axis=1)
+        data_frame.drop([feature], axis=1)
 
     output_file.close()
 
