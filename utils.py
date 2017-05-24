@@ -133,11 +133,12 @@ def feature_selection():
 
 def generate_report(report_title, clf, preds, y_test):
     '''
-        Takes a classifier object and evaluates model performance, generates figures and a table of results
-    :param clf: 
-    :param X: 
-    :param y: 
-    :return: 
+    
+    :param report_title: a string that will be used as the report filename 
+    :param clf: a scikit learn classifier object
+    :param preds: the predictions generated from the classifier 
+    :param y_test: the counterpart ground truth values
+    :return: nothing, outputs a file and generates corresponding confusion matrix
     '''
 
     output_file = open("results/" + report_title + ".txt", "w")
