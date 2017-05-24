@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import h5py
 import pandas as pd
-import keras.backend as K
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing.imputation import Imputer
@@ -11,7 +10,7 @@ from functools import reduce
 
 
 def load_data_csv(data_path, sample_size=None, mode=None):
-    data = pd.read_csv(data_path, header=None)
+    data = pd.read_csv(data_path)
 
     if mode is 0:
         data = data.loc[data.iloc[:, -1] == 0]
@@ -85,10 +84,6 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, con
 
 def combine_positive_negative_data(positive, negative):
     # TODO: take a list of positives and negatives as args
-
-    positive = reduce(lambda x, y: np.concatenate(x, y), positive)
-    negative = reduce(lambda x, y: np.concatenate(x, y), negative)
-
     data = np.concatenate([positive, negative], axis=0)
     return data
 
@@ -155,27 +150,3 @@ def generate_report(report_title, clf, preds, y_test):
     plt.clf()
     plot_confusion_matrix(confusion, classes=[0, 1], title=report_title)
     plt.savefig("results/" + report_title + ".png")
-
-
-def precision(y_true, y_pred):
-    """Precision metric.
-    Only computes a batch-wise average of precision.
-    Computes the precision, a metric for multi-label classification of
-    how many selected items are relevant.
-    """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-
-def recall(y_true, y_pred):
-    """Recall metric.
-    Only computes a batch-wise average of recall.
-    Computes the recall, a metric for multi-label classification of
-    how many relevant items are selected.
-    """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall

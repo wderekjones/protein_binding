@@ -25,7 +25,7 @@ def read_input_files():
     df_pro_list = []
     protein_features = pd.DataFrame(columns=["proteinName", "cluster_number"])
     drug_features = pd.DataFrame()
-    protein_drug_features = pd.DataFrame(columns=["proteinName", "cluster_number"])
+    #protein_drug_features = pd.DataFrame(columns=["proteinName", "cluster_number"])
 
     # for each input file of protein features, load the dataframe then append to the dataframe list
     if args.p is not None:
