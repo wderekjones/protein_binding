@@ -28,7 +28,7 @@ def load_data_csv(data_path, sample_size=None, mode=None):
     labels = data[:, (data.shape[1] - 1)]
     data = data[:, 0:-1]
 
-    imputer = Imputer()
+    imputer = Imputer(axis=1)
     data = imputer.fit_transform(data, labels)
 
     return data, labels
@@ -37,12 +37,11 @@ def load_data_csv(data_path, sample_size=None, mode=None):
 def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
 
-    features_list = input_fo.keys()
 
     # if features_list is none then use all of the features
-    #if features_list is None:
-    #    features_list = list(input_fo.keys())
-    #    features_list.remove("label")
+    if features_list is None:
+        features_list = list(input_fo.keys())
+        features_list.remove("label")
 
     # in order to determine indices, select all of the labels
     full_labels = np.asarray(input_fo["label"])
@@ -75,11 +74,10 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, con
 
     label_array = np.asarray(input_fo["label"])[sample]
 
-    imputer = Imputer()
+    imputer = Imputer(axis=1)
     data_array = imputer.fit_transform(data_array)
 
     return data_array, label_array
-
 
 def combine_positive_negative_data(positive, negative):
     # TODO: take a list of positives and negatives as args
