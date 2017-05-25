@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing.imputation import Imputer
-from functools import reduce
+from sklearn.metrics import roc_curve,roc_auc_score
 
 
 def load_data_csv(data_path, sample_size=None, mode=None):
@@ -37,17 +37,14 @@ def load_data_csv(data_path, sample_size=None, mode=None):
 def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
 
-    dataset_size = input_fo["label"].shape[0]
-
-    # if sample size is none then select all of the data
-    if sample_size is None:
-        sample_size = dataset_size
+    features_list = input_fo.keys()
 
     # if features_list is none then use all of the features
-    if features_list is None:
-        features_list = list(input_fo.keys())
-        features_list.remove("label")
+    #if features_list is None:
+    #    features_list = list(input_fo.keys())
+    #    features_list.remove("label")
 
+    # in order to determine indices, select all of the labels
     full_labels = np.asarray(input_fo["label"])
 
     j = 0
@@ -60,8 +57,10 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, con
             idxs.append(j)
         j += 1
 
-    if sample_size > len(idxs):
+    # if sample size is none then select all of the indices
+    if sample_size is None or sample_size > len(idxs):
         sample_size = len(idxs)
+
     sample = np.random.choice(idxs, sample_size, replace=False)
 
     # get the data and store in numpy array
@@ -77,7 +76,7 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, con
     label_array = np.asarray(input_fo["label"])[sample]
 
     imputer = Imputer()
-    data_array = imputer.fit_transform(data_array, label_array)
+    data_array = imputer.fit_transform(data_array)
 
     return data_array, label_array
 
@@ -131,7 +130,7 @@ def feature_selection():
     return feat
 
 
-def generate_report(report_title, clf, preds, y_test):
+def generate_report(report_title, clf, X_test, y_test):
     '''
     
     :param report_title: a string that will be used as the report filename 
@@ -141,13 +140,33 @@ def generate_report(report_title, clf, preds, y_test):
     :return: nothing, outputs a file and generates corresponding confusion matrix
     '''
 
+    preds = clf.predict(X_test)
+
+    # generate .txt containing precision/recall/f1-score and hyperparameters
     output_file = open("results/" + report_title + ".txt", "w")
     output_file.write(report_title + "\n")
     output_file.write(classification_report(y_test, preds, target_names=["Class 0", "Class 1"], digits=4))
     output_file.write("\n" + clf.__str__())
     output_file.close()
 
+    # generate the output confusion matrix
     confusion = confusion_matrix(y_test, preds)
     plt.clf()
     plot_confusion_matrix(confusion, classes=[0, 1], title=report_title)
+    plt.tight_layout()
+    plt.savefig("results/" + report_title + ".png")
+
+    # generate the output roc curve
+    scores = clf.predict_proba(X_test)
+    fpr, tpr, _ = roc_curve(y_test, scores[:, 1])
+    auc = roc_auc_score(y_test, scores[:, 1])
+
+    plt.clf()
+    plt.plot(fpr, tpr)
+    plt.xlabel("FPR")
+    plt.ylabel("TPR")
+    plt.title("AUC: " + str(auc))
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.tight_layout()
     plt.savefig("results/" + report_title + ".png")
