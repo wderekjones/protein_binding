@@ -140,6 +140,7 @@ def generate_report(report_title, clf, X_test, y_test):
 
     preds = clf.predict(X_test)
 
+
     # generate .txt containing precision/recall/f1-score and hyperparameters
     output_file = open("results/" + report_title + ".txt", "w")
     output_file.write(report_title + "\n")
@@ -152,10 +153,11 @@ def generate_report(report_title, clf, X_test, y_test):
     plt.clf()
     plot_confusion_matrix(confusion, classes=[0, 1], title=report_title)
     plt.tight_layout()
-    plt.savefig("results/" + report_title + ".png")
+    plt.savefig("results/" + report_title + "_confusion.png")
 
     # generate the output roc curve
     scores = clf.predict_proba(X_test)
+
     fpr, tpr, _ = roc_curve(y_test, scores[:, 1])
     auc = roc_auc_score(y_test, scores[:, 1])
 
@@ -163,8 +165,8 @@ def generate_report(report_title, clf, X_test, y_test):
     plt.plot(fpr, tpr)
     plt.xlabel("FPR")
     plt.ylabel("TPR")
-    plt.title("AUC: " + str(auc))
+    plt.title(str(report_title)+"\n AUC: " + str(auc))
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.tight_layout()
-    plt.savefig("results/" + report_title + ".png")
+    plt.savefig("results/" + report_title + "_roc.png")

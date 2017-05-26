@@ -66,7 +66,7 @@ def read_input_files():
     save_to_hdf5(protein_drug_features)
     protein_drug_features.to_csv('data/ml_pro_features_labels.csv', index=False, header=True)
     protein_drug_metadata = open("data/ml_pro_features_labels_metadata.txt", "w")
-    protein_drug_metadata.write(str(list(protein_drug_features)))
+    protein_drug_metadata.write(str(list(protein_drug_features.columns.values)))
     protein_drug_metadata.close()
 
     print("Output files generated in ", str(time.clock() - start_time), " seconds.")
