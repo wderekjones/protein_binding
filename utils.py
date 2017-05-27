@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing.imputation import Imputer
-from sklearn.metrics import roc_curve,roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score
 
 
 def load_data_csv(data_path, sample_size=None, mode=None):
@@ -37,24 +37,30 @@ def load_data_csv(data_path, sample_size=None, mode=None):
 def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
 
-
     # if features_list is none then use all of the features
     if features_list is None:
         features_list = list(input_fo.keys())
         features_list.remove("label")
 
-    # in order to determine indices, select all of the labels
+    # in order to determine indices, select all of the labels and conformations, then seperately choose based on specified conditions, then find the intersection of the two sets.
     full_labels = np.asarray(input_fo["label"])
+    full_conformations = np.asarray(input_fo["cluster_number"])
+    full_idxs = np.arange(0, full_labels.shape[0], 1)
+    full_idxs = np.reshape(full_idxs, [full_idxs.shape[0], 1])
 
-    j = 0
-    idxs = []
-    for element in full_labels:
-        if mode is not None:
-            if element[0] == mode:
-                idxs.append(j)
-        else:
-            idxs.append(j)
-        j += 1
+    mode_idxs = []
+    conform_idxs = []
+    if mode is not None:
+        mode_idxs = full_idxs[full_labels[:, ] == mode]
+    else:
+        mode_idxs = full_idxs
+
+    if conformation is not None:
+        conform_idxs = full_idxs[full_conformations[:, ] == conformation]
+    else:
+        conform_idxs = full_idxs
+
+    idxs = np.intersect1d(mode_idxs, conform_idxs)
 
     # if sample size is none then select all of the indices
     if sample_size is None or sample_size > len(idxs):
@@ -78,6 +84,7 @@ def load_data_h5(data_path, sample_size=None, features_list=None, mode=None, con
     data_array = imputer.fit_transform(data_array)
 
     return data_array, label_array
+
 
 def combine_positive_negative_data(positive, negative):
     # TODO: take a list of positives and negatives as args
@@ -140,7 +147,6 @@ def generate_report(report_title, clf, X_test, y_test):
 
     preds = clf.predict(X_test)
 
-
     # generate .txt containing precision/recall/f1-score and hyperparameters
     output_file = open("results/" + report_title + ".txt", "w")
     output_file.write(report_title + "\n")
@@ -165,7 +171,7 @@ def generate_report(report_title, clf, X_test, y_test):
     plt.plot(fpr, tpr)
     plt.xlabel("FPR")
     plt.ylabel("TPR")
-    plt.title(str(report_title)+"\n AUC: " + str(auc))
+    plt.title(str(report_title) + "\n AUC: " + str(auc))
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.tight_layout()
