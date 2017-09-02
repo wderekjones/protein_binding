@@ -1,0 +1,14 @@
+Step 3 Random Forest Test Set Performance
+             precision    recall  f1-score   support
+
+        0.0       0.99      1.00      1.00     70497
+        1.0       0.93      0.79      0.85      1861
+
+avg / total       0.99      0.99      0.99     72358
+Step 3 Logistic Regression Test Set Performance
+             precision    recall  f1-score   support
+
+        0.0       1.00      0.85      0.91     70497
+        1.0       0.13      0.85      0.22      1861
+
+avg / total       0.97      0.85      0.90     72358

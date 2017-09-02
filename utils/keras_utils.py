@@ -1,7 +1,7 @@
 import keras.backend as K
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score
-from utils import plot_confusion_matrix
+from utils.experiment import plot_confusion_matrix
 
 
 def precision(y_true, y_pred):
@@ -31,9 +31,9 @@ def recall(y_true, y_pred):
 def generate_report_keras(report_title, clf, X_test, y_test):
     '''
 
-    :param report_title: a string that will be used as the report filename 
+    :param report_title: a string that will be used as the report filename
     :param clf: a scikit learn classifier object
-    :param preds: the predictions generated from the classifier 
+    :param preds: the predictions generated from the classifier
     :param y_test: the counterpart ground truth values
     :return: nothing, outputs a file and generates corresponding confusion matrix
     '''

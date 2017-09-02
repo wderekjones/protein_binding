@@ -99,3 +99,6 @@ ENV/
 .idea/markdown-navigator/
 .idea/workspace.xml
 SampleInputs/
+data/ligand_features.pkl
+data/protein_features.pkl
+data/protein_ligand_features.pkl

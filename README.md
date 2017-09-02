@@ -16,11 +16,17 @@ where:
        --m denotes molecular descriptors file
        --pm specifies the list of protein-molec feature filepaths
        --feats specifies the file containing the features to keep from the E-Dragon molecular descriptors output
+       --o specifies the output file name
+
+Note that each of the arguments are optional.
 
 example:
 > parser.py --p "SampleInputs/protein/protein_features_2struc.csv" "SampleInputs/protein/protein_features_coach_avg.csv" --pm "SampleInputs/1QCF_ML_Features/docking_summary_final.csv" --m "SampleInputs/MolecularDescriptors-Dragon7/outputExclusionMolecularDescriptors.txt" --feats "SampleInputs/MolecularDescriptors-Dragon7/descriptorsListTS2.txt"
 	
 Note: this script has been verified to run with python 3.6.1
 
+## Results
+The results of our classification methods are contained in the Classification.ipynb and our visualizations are contained in the Dimensionality_Reduction.ipynb. You must
+open these files as jupyter notebooks.
 
 
