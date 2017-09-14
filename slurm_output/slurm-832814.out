@@ -1,0 +1,40 @@
+  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 65.11it/s] 54%|█████▍    | 14/26 [00:00<00:00, 65.71it/s] 81%|████████  | 21/26 [00:00<00:00, 65.81it/s]100%|██████████| 26/26 [00:00<00:00, 64.18it/s]
+Number of features before removing nulls 11
+
+Number of features after removing 188 nulls 11
+loading 26 proteins.
+
+features_to_keep.shape =  (5, 1)
+Traceback (most recent call last):
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/backends/backend_pgf.py", line 305, in __init__
+    cwd=self.tmpdir)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/subprocess.py", line 707, in __init__
+    restore_signals, start_new_session)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/subprocess.py", line 1333, in _execute_child
+    raise child_exception_type(errno_num, err_msg)
+FileNotFoundError: [Errno 2] No such file or directory: 'xelatex'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "feature_selection.py", line 183, in <module>
+    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+  File "feature_selection.py", line 132, in run_iterative_forest_selection
+    best_forest_tpr, clf_label="Random Forest")
+  File "/scratch/wdjo224/protein_binding/utils/experiment.py", line 244, in plot_roc_curve
+    plt.tight_layout()
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/pyplot.py", line 1406, in tight_layout
+    fig.tight_layout(pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/figure.py", line 1748, in tight_layout
+    renderer = get_renderer(self)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/tight_layout.py", line 223, in get_renderer
+    renderer = canvas.get_renderer()
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/backends/backend_pgf.py", line 967, in get_renderer
+    return RendererPgf(self.figure, None, dummy=True)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/backends/backend_pgf.py", line 417, in __init__
+    self.latexManager = LatexManagerFactory.get_latex_manager()
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/backends/backend_pgf.py", line 233, in get_latex_manager
+    new_inst = LatexManager()
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/backends/backend_pgf.py", line 310, in __init__
+    % self.texcommand
+RuntimeError: Latex command not found. Install 'xelatex' or change pgf.texsystem to the desired command.

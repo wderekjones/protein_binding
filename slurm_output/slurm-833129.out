@@ -1,0 +1,24 @@
+  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 69.48it/s] 54%|█████▍    | 14/26 [00:00<00:00, 68.93it/s] 81%|████████  | 21/26 [00:00<00:00, 67.73it/s]100%|██████████| 26/26 [00:00<00:00, 64.25it/s]
+Number of features before removing nulls 11
+
+Number of features after removing 188 nulls 11
+|full_features| =  11
+loading 26 proteins.
+
+  0%|          | 0/26 [00:00<?, ?it/s] 42%|████▏     | 11/26 [00:00<00:00, 107.50it/s] 92%|█████████▏| 24/26 [00:00<00:00, 112.04it/s]100%|██████████| 26/26 [00:00<00:00, 111.71it/s]features_to_keep.shape =  (5, 1)
+|full_features| =  5
+loading 26 proteins.
+
+  0%|          | 0/26 [00:00<?, ?it/s] 54%|█████▍    | 14/26 [00:00<00:00, 136.46it/s]100%|██████████| 26/26 [00:00<00:00, 135.14it/s]features_to_keep.shape =  (2, 1)
+|full_features| =  2
+loading 26 proteins.
+
+  0%|          | 0/26 [00:00<?, ?it/s] 65%|██████▌   | 17/26 [00:00<00:00, 166.54it/s]100%|██████████| 26/26 [00:00<00:00, 166.47it/s]features_to_keep.shape =  (1, 1)
+|full_features| =  1
+loading 26 proteins.
+
+features_to_keep.shape =  (0, 1)
+Traceback (most recent call last):
+  File "feature_selection.py", line 181, in <module>
+    best_features.to_csv(args.out+"best_result.csv")
+AttributeError: 'list' object has no attribute 'to_csv'

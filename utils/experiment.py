@@ -4,7 +4,7 @@ import itertools
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.input_pipeline import load_data_h5
+from utils.input_pipeline import load_data
 from sklearn.metrics import classification_report, roc_auc_score, roc_curve, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.neighbors import KNeighborsClassifier
@@ -90,36 +90,6 @@ def output_classifier_roc(title, y_test, scores):
     plt.tight_layout()
     lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.savefig("results/" + title + "_roc.png",  bbox_extra_artists=(lgd,), bbox_inches='tight')
-
-
-def plot_confusion_matrix(cm, classes,
-                          normalize=True,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Purples):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, cm[i, j],
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
 
 
 def save_results(title, clf, X_test, y_test):
@@ -244,3 +214,80 @@ def run_full_experiment(clf_mode, title, X_, y_, random_seed, n_iterations):
     print(title, "training complete in ", (t1-t0), " seconds.")
 
     return clf, avg_f1
+
+
+def plot_feature_importance_curve(plot_title, plot_path, feature_support):
+    plt.clf()
+    #plt.figure(figsize=[12, 8])
+    fig, ax = plt.subplots()
+    indices = range(0,len(feature_support))
+    sorted_importances = np.sort(feature_support)[::-1]
+    benchmark = (1/len(feature_support))*np.ones([len(feature_support)])
+    zeros = np.zeros([len(feature_support)])
+    ax.plot(indices, sorted_importances, label="importances")
+    ax.plot(indices, benchmark, label="$1/n$")
+    ax.fill_between(indices, sorted_importances, benchmark, where=benchmark > zeros,
+                    alpha=0.5,interpolate=True)
+    ax.set_title(plot_title)
+    ax.set_ylabel("Feature Importance")
+    fig.savefig(plot_path)
+    plt.close()
+
+
+def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label):
+    plt.clf()
+    plt.figure(figsize=[12, 8])
+    plt.plot(clf_fpr, clf_tpr, lw=2, color='g')
+
+    plt.plot([0, 1], [0, 1], 'r--', lw=2, label=clf_label, color='k')
+
+    plt.xlabel("FPR")
+    plt.ylabel("TPR")
+    plt.title(plot_title)
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.tight_layout()
+    lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.savefig(plot_path,  bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.close()
+
+
+def plot_confusion_matrix(plot_path, plot_title, cm, classes,
+                          normalize=True,
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+
+    plt.clf()
+    plt.figure(figsize=[10, 8])
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(plot_title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.savefig(plot_path)
+    plt.close()
+
+
+def output_classification_results(results_title, results_path, y_true, preds):
+    result_file = open(results_path, "w")
+    report = classification_report(y_true, preds)
+    result_file.write(results_title+"\n" + str(report))
+    result_file.close()

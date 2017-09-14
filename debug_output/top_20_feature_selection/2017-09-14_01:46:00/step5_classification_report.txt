@@ -1,0 +1,8 @@
+Step 5 classification report
+
+             precision    recall  f1-score   support
+
+        0.0       0.99      0.92      0.96     70497
+        1.0       0.21      0.79      0.33      1861
+
+avg / total       0.97      0.92      0.94     72358

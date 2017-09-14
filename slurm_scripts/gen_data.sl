@@ -2,7 +2,7 @@
 
 #SBATCH --mail-user wdjo224@g.uky.edu
 
-source activate /home/wdjo224/miniconda3/envs/protein_binding/bin
+source activate protein_binding
 
 
 

@@ -1,0 +1,16 @@
+  0%|          | 0/26 [00:00<?, ?it/s]  4%|▍         | 1/26 [00:00<00:23,  1.04it/s]  8%|▊         | 2/26 [00:01<00:19,  1.26it/s] 12%|█▏        | 3/26 [00:01<00:15,  1.45it/s] 15%|█▌        | 4/26 [00:02<00:13,  1.62it/s] 19%|█▉        | 5/26 [00:02<00:12,  1.73it/s] 23%|██▎       | 6/26 [00:03<00:10,  1.95it/s] 27%|██▋       | 7/26 [00:03<00:08,  2.14it/s] 31%|███       | 8/26 [00:03<00:08,  2.22it/s] 35%|███▍      | 9/26 [00:04<00:06,  2.43it/s] 38%|███▊      | 10/26 [00:04<00:06,  2.60it/s] 42%|████▏     | 11/26 [00:04<00:04,  3.03it/s] 46%|████▌     | 12/26 [00:05<00:05,  2.50it/s] 50%|█████     | 13/26 [00:05<00:06,  2.04it/s] 54%|█████▍    | 14/26 [00:06<00:05,  2.27it/s] 58%|█████▊    | 15/26 [00:06<00:04,  2.49it/s] 62%|██████▏   | 16/26 [00:06<00:03,  2.69it/s] 65%|██████▌   | 17/26 [00:07<00:02,  3.05it/s] 69%|██████▉   | 18/26 [00:07<00:03,  2.37it/s] 73%|███████▎  | 19/26 [00:08<00:02,  2.54it/s] 77%|███████▋  | 20/26 [00:08<00:02,  2.75it/s] 81%|████████  | 21/26 [00:08<00:01,  2.88it/s] 85%|████████▍ | 22/26 [00:08<00:01,  3.19it/s] 88%|████████▊ | 23/26 [00:09<00:00,  3.48it/s] 92%|█████████▏| 24/26 [00:09<00:00,  3.37it/s] 96%|█████████▌| 25/26 [00:09<00:00,  3.50it/s]100%|██████████| 26/26 [00:09<00:00,  3.80it/s]
+Number of features before removing nulls 11
+
+Number of features after removing 188 nulls 11
+|full_features| =  11
+loading 26 proteins.
+
+features_to_keep.shape =  (5, 1)
+Traceback (most recent call last):
+  File "feature_selection.py", line 178, in <module>
+    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+  File "feature_selection.py", line 136, in run_iterative_forest_selection
+    output_directory+"step" + str(step) + "_feature_importances", support)
+  File "/scratch/wdjo224/protein_binding/utils/experiment.py", line 230, in plot_feature_importance_curve
+    ax.title(plot_title)
+TypeError: 'Text' object is not callable

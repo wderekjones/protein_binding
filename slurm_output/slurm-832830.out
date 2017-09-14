@@ -1,0 +1,27 @@
+  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 63.60it/s] 54%|█████▍    | 14/26 [00:00<00:00, 64.26it/s] 81%|████████  | 21/26 [00:00<00:00, 64.27it/s]100%|██████████| 26/26 [00:00<00:00, 62.48it/s]
+Number of features before removing nulls 11
+
+Number of features after removing 188 nulls 11
+loading 26 proteins.
+
+features_to_keep.shape =  (5, 1)
+Traceback (most recent call last):
+  File "feature_selection.py", line 177, in <module>
+    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+  File "feature_selection.py", line 135, in run_iterative_forest_selection
+    output_directory+"step" + str(step) + "_feature_importances", support)
+  File "/scratch/wdjo224/protein_binding/utils/experiment.py", line 225, in plot_feature_importance_curve
+    plt.plot(range(0, len(feature_support)), benchmark, label="$1/n$")
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/pyplot.py", line 3317, in plot
+    ret = ax.plot(*args, **kwargs)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/__init__.py", line 1898, in inner
+    return func(ax, *args, **kwargs)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/axes/_axes.py", line 1406, in plot
+    for line in self._get_lines(*args, **kwargs):
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/axes/_base.py", line 407, in _grab_next_args
+    for seg in self._plot_args(remaining, kwargs):
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/axes/_base.py", line 385, in _plot_args
+    x, y = self._xy_from_xy(x, y)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/matplotlib/axes/_base.py", line 244, in _xy_from_xy
+    "have shapes {} and {}".format(x.shape, y.shape))
+ValueError: x and y must have same first dimension, but have shapes (11,) and (1, 11)

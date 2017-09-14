@@ -1,11 +1,8 @@
 import argparse
 import pandas as pd
 import numpy as np
+from utils.input_pipeline import compute_proportion
 
-
-def compute_proportion(small_list,big_list):
-    ct = len(set(big_list).intersection(set(small_list)))
-    return ct/len(small_list)
 
 parser = argparse.ArgumentParser(description="compute feature proportions")
 

@@ -1,7 +1,7 @@
 # protein_binding
 
-This repository contains a collection of python scripts for computing a drug-protein binding classification.
-
+This repository contains the implementation of "Towards Protein-Kinase Invariant Models for Drug Discovery" by Jones, de Jong, Ellingson.
+The readme will be updated once things have been finalized!
 ## Parser
 A script that collects various features from multiple input files and outputs a file of protein, drug, protein-drug pair features as specified by the user. 
 
@@ -26,7 +26,5 @@ example:
 Note: this script has been verified to run with python 3.6.1
 
 ## Results
-The results of our classification methods are contained in the Classification.ipynb and our visualizations are contained in the Dimensionality_Reduction.ipynb. You must
-open these files as jupyter notebooks.
-
+Finishing the code soon!
 
