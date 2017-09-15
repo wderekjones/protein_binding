@@ -43,6 +43,8 @@ def load_protein(data_path, label=None, protein_name=None, sample_size=None, fea
             features_list.remove("receptor")
         if "drugID" in features_list:
             features_list.remove("drugID")
+        if "label" in features_list:
+            features_list.remove("label")
 
         # in order to determine indices, select all of the labels and conformations, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
     full_labels = np.asarray(input_fo[str(protein_name)][label]).flatten()
