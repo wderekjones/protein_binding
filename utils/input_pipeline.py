@@ -6,42 +6,46 @@ from tqdm import tqdm
 from sklearn.preprocessing import Imputer, Normalizer
 
 
-def load_data(data_path, protein_name_list=None, sample_size=None, features_list=None, mode=None, conformation=None):
+def load_data(data_path, label=None, protein_name_list=None, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
 
     X = np.ndarray([], dtype=np.float32)
-    y = np.ndarray([], dtype=np.float32)
+    y = np.ndarray([], dtype=np.object)
     i = 0
 
     if protein_name_list is None:
         protein_name_list = list(input_fo.keys())
     print("loading", len(protein_name_list), "proteins.")
     for protein_name in tqdm(protein_name_list):
-        x_, y_ = load_protein(data_path, protein_name=protein_name, sample_size=sample_size,
+        x_, y_ = load_protein(data_path, label=label, protein_name=protein_name, sample_size=sample_size,
                               features_list=features_list, mode=mode, conformation=conformation)
         if i == 0:
             X = x_.astype(np.float32)
-            y = y_.astype(np.float32)
+            y = y_.astype(np.object)
         else:
             X = np.vstack((X, x_.astype(np.float32)))
-            y = np.vstack((y, y_.astype(np.float32)))
+            y = np.vstack((y, y_.astype(np.object)))
         i += 1
 
     return X, y
 
 
-def load_protein(data_path, protein_name=None, sample_size=None, features_list=None, mode=None, conformation=None):
+def load_protein(data_path, label=None, protein_name=None, sample_size=None, features_list=None, mode=None, conformation=None):
     input_fo = h5py.File(data_path, 'r')
-
+    if label is None:
+        label = "label"
     # if features_list is none then use all of the features
     if features_list is None:
         features_list = list(input_fo[str(protein_name)].keys())
-        features_list.remove("label")
-        features_list.remove("receptor")
-        features_list.remove("drugID")
+        if label in features_list:
+            features_list.remove(label)
+        if "receptor" in features_list:
+            features_list.remove("receptor")
+        if "drugID" in features_list:
+            features_list.remove("drugID")
 
         # in order to determine indices, select all of the labels and conformations, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
-    full_labels = np.asarray(input_fo[str(protein_name)]["label"]).flatten()
+    full_labels = np.asarray(input_fo[str(protein_name)][label]).flatten()
     full_idxs = np.arange(0, full_labels.shape[0], 1)
 
     mode_idxs = []
@@ -67,9 +71,9 @@ def load_protein(data_path, protein_name=None, sample_size=None, features_list=N
         data_array[:, i] = data[:, 0]
         i += 1
 
-    label_array = np.asarray(input_fo[str(protein_name)]["label"])[sample]
+    label_array = np.asarray(input_fo[str(protein_name)][label])[sample]
 
-    return data_array.astype(np.float32), label_array.astype(np.float32)
+    return data_array.astype(np.float32), label_array.astype(np.object)
 
 
 def generate_held_out_set(data_path,protein_name_list=None, features_list=None,mode=None,sample_size=None):

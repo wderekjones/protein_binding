@@ -90,11 +90,16 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
     max_steps = 10
     while len(full_features) > 0 and step < max_steps:
 
+        # Write the features used for this iteration to a file
+        full_features.to_csv(output_directory + "step" + str(step) + ".csv", index=False, header=False)
+
         # Load the data
-        print("|full_features| = ",full_features.shape[0])
         X, y = load_data(data_path, features_list=list(full_features[0]))
+
+        # if argument for null columns passed, then impute the data using the strategy provided via the strat argument
         if args.null is not None:
             X = Imputer(strategy=args.strat).fit_transform(X)
+
         X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y.astype(np.float32),
                                 stratify=y.astype(np.float32), test_size=0.2, shuffle=True, random_state=random_state)
 
@@ -103,7 +108,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
                                          criterion='gini', random_state=random_state)
 
         # find the optimal setting of parameters that maximizes the weighted f1 measure, using 100 samples of
-        # 5-fold cross validation. Then select the best forest and predict on the testing set.
+        # 3-fold cross validation. Then select the best forest and predict on the testing set.
         forest_estimator = RandomizedSearchCV(rforest, forest_params, cv=3, scoring='f1_weighted', n_jobs=5, random_state=random_state)
         forest_estimator.fit(X_train, y_train.flatten())
         best_forest = forest_estimator.best_estimator_
@@ -114,15 +119,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
 
         # extract the feature importances, visualize, and then save them as the set of features for the next iteration
         support = best_forest.feature_importances_
-        keep_idxs = support > np.mean(support, axis=0)
-        features_to_keep = pd.DataFrame(np.asarray(list(full_features[0]))[keep_idxs])
-        print("features_to_keep.shape = ",features_to_keep.shape)
-        if len(features_to_keep.values) < 1:
-            break
-        else:
-            #features_to_keep.to_csv(output_directory + "step" + str(step)+"_most_important_feats" + ".csv", index=False, header=False)
-            full_features.to_csv(output_directory + "step" + str(step) + ".csv",
-                                    index=False, header=False)
+
 
 
         # plot the ROC curves of the set of features that the forest was trained upon
@@ -143,7 +140,6 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
                                           str(step)+"_classification_report.txt", y_test, best_forest_preds)
 
         # output a breakdown of feature proportions per class.
-        # TODO: visualize these as a histogram over the 4 possible categories
         output_feature_summary(output_directory+"step"+str(step)+"feature_summary.txt", "data/all_kinase/with_pocket/full_kinase_set_features_list.csv",
                                output_directory+"step"+str(step)+".csv")
 
@@ -152,36 +148,43 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
                               drug_feature_path="data/all_kinase/with_pocket/drug_features_list.csv",
                               binding_feature_path="data/all_kinase/with_pocket/binding_features_list.csv")
 
-        plt.clf()
+        # TODO: Normalize the values in the histogram
         sns.countplot(x="feature_class", data=feature_histogram)
 
         plt.savefig(output_directory+"step"+str(step)+"_countplot.png")
 
-        # compute the precision, recall, and fscore of the predicitions
-
-        # extract the values for the undersampled class, in this case the positive class
+        #compute the precision, recall, and fscore of the predicitions extract the values for the undersampled class,
+        # in this case the positive class
+        precision,recall,fscore = 0,0,0
         if undersampled is not None:
             precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds,
-                                                                           average='weighted', labels=[undersampled])
+                                                                           labels=[undersampled])
         else:
             precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds)
 
+        keep_idxs = support > np.mean(support, axis=0)
+        features_to_keep = pd.DataFrame(np.asarray(list(full_features[0]))[keep_idxs])
+        if len(features_to_keep.values) < 1:
+            break
+
         if len(support) > 0:
-            if (np.sum([precision, recall, fscore])/len(support)) > best_metric_sum:
+            # find the mean of the precision, recall, and fscore. Divide this by the number of features, compare
+            # to the largest value computed so far
+            #if (np.sum([precision, recall, fscore])/3)/(len(support)) > best_metric_sum:
+            # so incorporating the magnitude of the feature set results in a selection that is much too aggressive
+            # SO just look at the weighted average of the metrics (change made at 2:15am friday)
+            if np.sum([precision, recall, fscore])/3 > best_metric_sum:
                 best_metric_sum = np.sum([precision, recall, fscore])/len(support)
                 best_features_to_keep = full_features
 
         step += 1
 
-        #full_features = list(features_to_keep[0])
         full_features = features_to_keep
 
     return best_features_to_keep
 
-best_feature_set = set()
-for i in range(10):
-    best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
-    best_feature_set.union(set(best_features[0]))
-
-
-pd.DataFrame(list(best_feature_set)).to_csv(args.out+current_output_directory+"/best_result.csv")
+#best_feature_set = set()
+#for i in range(10):
+best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+#    best_feature_set.union(set(best_features[0]))
+best_features.to_csv(args.out+current_output_directory+"/best_result.csv")

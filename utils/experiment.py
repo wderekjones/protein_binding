@@ -3,7 +3,10 @@ import pickle
 import itertools
 import time
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+plt.style.use("seaborn-muted")
 from utils.input_pipeline import load_data
 from sklearn.metrics import classification_report, roc_auc_score, roc_curve, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_selection import VarianceThreshold
@@ -11,6 +14,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.model_selection import StratifiedKFold
+from sklearn.dummy import DummyClassifier
+
+plt.rc('font', family='serif', serif='Times')
+#plt.rc('text', usetex=True)
+plt.rc('xtick', labelsize=8)
+plt.rc('ytick', labelsize=8)
+plt.rc('axes', labelsize=8)
 
 
 def variance_thresholding(data_path, write_to_file=False, output_file_name=None):
@@ -218,15 +228,14 @@ def run_full_experiment(clf_mode, title, X_, y_, random_seed, n_iterations):
 
 def plot_feature_importance_curve(plot_title, plot_path, feature_support):
     plt.clf()
-    #plt.figure(figsize=[12, 8])
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12,8))
     indices = range(0,len(feature_support))
     sorted_importances = np.sort(feature_support)[::-1]
     benchmark = (1/len(feature_support))*np.ones([len(feature_support)])
     zeros = np.zeros([len(feature_support)])
     ax.plot(indices, sorted_importances, label="importances")
     ax.plot(indices, benchmark, label="$1/n$")
-    ax.fill_between(indices, sorted_importances, benchmark, where=benchmark > zeros,
+    ax.fill_between(indices, zeros, benchmark, where=benchmark > zeros,
                     alpha=0.5,interpolate=True)
     ax.set_title(plot_title)
     ax.set_ylabel("Feature Importance")
@@ -237,9 +246,9 @@ def plot_feature_importance_curve(plot_title, plot_path, feature_support):
 def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label):
     plt.clf()
     plt.figure(figsize=[12, 8])
-    plt.plot(clf_fpr, clf_tpr, lw=2, color='g')
+    plt.plot(clf_fpr, clf_tpr, lw=2, color='g', label=clf_label)
 
-    plt.plot([0, 1], [0, 1], 'r--', lw=2, label=clf_label, color='k')
+    plt.plot([0, 1], [0, 1], 'r--', lw=2, color='k')
 
     plt.xlabel("FPR")
     plt.ylabel("TPR")
@@ -252,6 +261,36 @@ def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label):
     plt.close()
 
 
+def plot_dummy_roc_comparison(plot_title, plot_path,clf,clf_label,X_train,y_train, X_test,y_test,random_state=None):
+    # it may be better to include all dummy comparison code in one function...class?
+    clf_tpr, clf_fpr, _ = roc_curve(y_test, clf.predict_proba(X_test)[:, 1])
+
+    random_strat_clf = DummyClassifier(strategy="stratified", random_state=random_state).fit(X_train,y_train)
+    random_uniform_clf = DummyClassifier(strategy="uniform", random_state=random_state).fit(X_train,y_train)
+    random_most_freq_clf = DummyClassifier(strategy="most_frequent", random_state=random_state).fit(X_train,y_train)
+
+    random_strat_tpr, random_strat_fpr, _ = roc_curve(y_test,random_strat_clf.predict_proba(X_test))
+    random_uniform_tpr, random_uniform_fpr, _ = roc_curve(y_test,random_uniform_clf.predict_proba(X_test))
+    random_most_freq_tpr, random_most_freq_fpr, _ = roc_curve(y_test,random_most_freq_clf.predict_proba(X_test))
+
+    plt.clf()
+    plt.figure(figsize=[12, 8])
+    plt.plot(clf_fpr, clf_tpr, lw=2, color='g', label=clf_label)
+    plt.plot(random_most_freq_fpr, random_most_freq_tpr, lw=2, color='b', label="most frequent")
+    plt.plot(random_strat_fpr, random_strat_tpr, lw=2, color='r', label="stratified")
+    plt.plot(random_uniform_fpr, random_uniform_tpr, lw=2, color='y', label="uniform")
+
+    plt.xlabel("FPR")
+    plt.ylabel("TPR")
+    plt.title(plot_title)
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.tight_layout()
+    lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.savefig(plot_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.close()
+
+
 def plot_confusion_matrix(plot_path, plot_title, cm, classes,
                           normalize=True,
                           cmap=plt.cm.Blues):
@@ -259,12 +298,12 @@ def plot_confusion_matrix(plot_path, plot_title, cm, classes,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
-
     plt.clf()
     plt.figure(figsize=[10, 8])
 
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        cm = np.round(cm,decimals=2)
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(plot_title)

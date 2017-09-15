@@ -1,6 +1,0 @@
-feature file: debug_output/top_selection_forest_feature_selection/2017-09-14_05:00:04/step1.csv
-proportion of features in full feature set: 1.0
-proportion of features in binding feature set: 0.0
-proportion of features in dragon feature set: 1.0
-proportion of features in drug_miner feature set: 0.0
-proportion of features in pocket feature set: 0.0
