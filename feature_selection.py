@@ -174,7 +174,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
             # so incorporating the magnitude of the feature set results in a selection that is much too aggressive
             # SO just look at the weighted average of the metrics (change made at 2:15am friday)
             if np.sum([precision, recall, fscore])/3 > best_metric_sum:
-                best_metric_sum = np.sum([precision, recall, fscore])/len(support)
+                best_metric_sum = np.sum([precision, recall, fscore])/3
                 best_features_to_keep = full_features
 
         step += 1
