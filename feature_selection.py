@@ -42,6 +42,7 @@ parser.add_argument("--f", type=str, help="path(s) to set of initial features")
 parser.add_argument("--data", type=str, help="path to initial dataset, this should at least contain the features specified by --f if given")
 parser.add_argument("--null", type=str, help="path to null features")
 parser.add_argument("--strat", type=str, help="imputation strategy used to fill in the null values")
+parser.add_argument("--label",type=str,help="optional specify target label")
 parser.add_argument("--out", type=str, help="output path to dir")
 args = parser.parse_args()
 
@@ -94,7 +95,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
         full_features.to_csv(output_directory + "step" + str(step) + ".csv", index=False, header=False)
 
         # Load the data
-        X, y = load_data(data_path, features_list=list(full_features[0]))
+        X, y = load_data(data_path, features_list=list(full_features[0]), label=args.label)
 
         # if argument for null columns passed, then impute the data using the strategy provided via the strat argument
         if args.null is not None:
