@@ -44,12 +44,13 @@ parser.add_argument("--null", type=str, help="path to null features")
 parser.add_argument("--strat", type=str, help="imputation strategy used to fill in the null values")
 parser.add_argument("--label",type=str,help="optional specify target label")
 parser.add_argument("--out", type=str, help="output path to dir")
+parser.add_argument("--prot", type=str, help="a flag that indicates that protein names are used as labels")
 args = parser.parse_args()
 
 random_state = np.random.RandomState(0)
 
 current_output_directory = arrow.now().format('YYYY-MM-DD_HH:mm:ss')
-def run_iterative_forest_selection(feature_path, output_directory=None, null_path=None, undersampled=None):
+def run_iterative_forest_selection(feature_path, output_directory=None, null_path=None, undersampled=None, prot_features=None):
     if output_directory is None:
         output_directory = current_output_directory
     else:
@@ -101,7 +102,11 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
         if args.null is not None:
             X = Imputer(strategy=args.strat).fit_transform(X)
 
-        X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y.astype(np.float32),
+        if prot_features is not None:
+            X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y,
+                                    stratify=y, test_size=0.2, shuffle=True, random_state=random_state)
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y.astype(np.float32),
                                 stratify=y.astype(np.float32), test_size=0.2, shuffle=True, random_state=random_state)
 
         # Instantiate and train the model. Optimize hyperparameters by sampling from integer distributions
@@ -115,21 +120,21 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
         best_forest = forest_estimator.best_estimator_
         best_forest_preds = best_forest.predict(X_test)
 
-        # compute the false positive and true positive rates for the positive class (confusing)
-        best_forest_fpr, best_forest_tpr, _ = roc_curve(y_test, best_forest.predict_proba(X_test)[:, 1])
 
         # extract the feature importances, visualize, and then save them as the set of features for the next iteration
         support = best_forest.feature_importances_
 
+        if prot_features is None:
+            # compute the false positive and true positive rates for the positive class (confusing)
+            best_forest_fpr, best_forest_tpr, _ = roc_curve(y_test, best_forest.predict_proba(X_test)[:, 1])
 
-
-        # plot the ROC curves of the set of features that the forest was trained upon
-        plot_roc_curve("Step " + str(step) + " ROC", output_directory + "step" + str(step) + "_roc", best_forest_fpr,
+            # plot the ROC curves of the set of features that the forest was trained upon
+            plot_roc_curve("Step " + str(step) + " ROC", output_directory + "step" + str(step) + "_roc", best_forest_fpr,
                        best_forest_tpr, clf_label="Random Forest")
 
-        # compute and plot the confusion matrices for the set of features that the forest was trained upon
-        rforest_confusion = confusion_matrix(y_test, best_forest_preds)
-        plot_confusion_matrix(cm=rforest_confusion, classes=[0, 1], plot_title="Random Forest Step "+str(step)+" Confusion",
+            # compute and plot the confusion matrices for the set of features that the forest was trained upon
+            rforest_confusion = confusion_matrix(y_test, best_forest_preds)
+            plot_confusion_matrix(cm=rforest_confusion, classes=[0, 1], plot_title="Random Forest Step "+str(step)+" Confusion",
                               plot_path=output_directory+"step"+str(step)+"_confusion.png")
 
         # compute the importances of the features that the forest was trained upon
@@ -161,7 +166,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
             precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds,
                                                                            labels=[undersampled])
         else:
-            precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds)
+            precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds, average='micro')
 
         keep_idxs = support > np.mean(support, axis=0)
         features_to_keep = pd.DataFrame(np.asarray(list(full_features[0]))[keep_idxs])
@@ -174,7 +179,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
             #if (np.sum([precision, recall, fscore])/3)/(len(support)) > best_metric_sum:
             # so incorporating the magnitude of the feature set results in a selection that is much too aggressive
             # SO just look at the weighted average of the metrics (change made at 2:15am friday)
-            if np.sum([precision, recall, fscore])/3 > best_metric_sum:
+            if np.sum([precision, recall, fscore])/3 >= best_metric_sum:
                 best_metric_sum = np.sum([precision, recall, fscore])/3
                 best_features_to_keep = full_features
 
@@ -186,6 +191,10 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
 
 #best_feature_set = set()
 #for i in range(10):
-best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+if args.prot is not None:
+    best_features = run_iterative_forest_selection(args.f, args.out, args.null, prot_features=1)
+else:
+    best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
+
 #    best_feature_set.union(set(best_features[0]))
 best_features.to_csv(args.out+current_output_directory+"/best_result.csv")
