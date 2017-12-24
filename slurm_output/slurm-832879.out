@@ -1,26 +1,0 @@
-  0%|          | 0/26 [00:00<?, ?it/s]  4%|▍         | 1/26 [00:00<00:12,  1.98it/s]  8%|▊         | 2/26 [00:00<00:11,  2.10it/s] 12%|█▏        | 3/26 [00:01<00:11,  1.94it/s] 15%|█▌        | 4/26 [00:01<00:11,  1.98it/s] 19%|█▉        | 5/26 [00:02<00:09,  2.11it/s] 23%|██▎       | 6/26 [00:02<00:08,  2.39it/s] 27%|██▋       | 7/26 [00:03<00:07,  2.50it/s] 31%|███       | 8/26 [00:03<00:07,  2.43it/s] 35%|███▍      | 9/26 [00:03<00:06,  2.47it/s] 38%|███▊      | 10/26 [00:04<00:06,  2.44it/s] 42%|████▏     | 11/26 [00:04<00:04,  3.06it/s] 46%|████▌     | 12/26 [00:04<00:04,  3.02it/s] 50%|█████     | 13/26 [00:05<00:04,  3.08it/s] 54%|█████▍    | 14/26 [00:05<00:03,  3.37it/s] 58%|█████▊    | 15/26 [00:05<00:03,  3.52it/s] 62%|██████▏   | 16/26 [00:05<00:02,  3.49it/s] 65%|██████▌   | 17/26 [00:06<00:02,  3.76it/s] 69%|██████▉   | 18/26 [00:06<00:02,  3.06it/s] 73%|███████▎  | 19/26 [00:06<00:02,  3.16it/s] 77%|███████▋  | 20/26 [00:07<00:02,  2.78it/s] 81%|████████  | 21/26 [00:07<00:01,  3.05it/s] 85%|████████▍ | 22/26 [00:07<00:01,  3.38it/s] 88%|████████▊ | 23/26 [00:07<00:00,  3.69it/s] 92%|█████████▏| 24/26 [00:08<00:00,  3.60it/s] 96%|█████████▌| 25/26 [00:08<00:00,  3.76it/s]100%|██████████| 26/26 [00:08<00:00,  3.83it/s]
-Number of features before removing nulls 11
-
-Number of features after removing 188 nulls 11
-loading 26 proteins.
-
-  0%|          | 0/26 [00:00<?, ?it/s]
-features_to_keep.shape =  (5, 1)
-loading 26 proteins.
-Traceback (most recent call last):
-  File "feature_selection.py", line 177, in <module>
-    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
-  File "feature_selection.py", line 96, in run_iterative_forest_selection
-    X, y = load_data(data_path, features_list=full_features)
-  File "/scratch/wdjo224/protein_binding/utils/input_pipeline.py", line 21, in load_data
-    features_list=features_list, mode=mode, conformation=conformation)
-  File "/scratch/wdjo224/protein_binding/utils/input_pipeline.py", line 66, in load_protein
-    data = np.asarray(input_fo[str(protein_name)][str(dataset)], dtype=np.float32)[sample]
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2846)
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2804)
-  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/h5py/_hl/group.py", line 169, in __getitem__
-    oid = h5o.open(self.id, self._e(name), lapl=self._lapl)
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2846)
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2804)
-  File "h5py/h5o.pyx", line 190, in h5py.h5o.open (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/h5o.c:3740)
-KeyError: "Unable to open object (Object '0' doesn't exist)"

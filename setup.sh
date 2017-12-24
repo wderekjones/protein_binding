@@ -1,0 +1,1 @@
+source activate protein_binding

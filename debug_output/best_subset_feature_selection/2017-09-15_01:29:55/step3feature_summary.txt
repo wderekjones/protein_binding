@@ -1,0 +1,6 @@
+feature file: debug_output/best_subset_feature_selection/2017-09-15_01:29:55/step3.csv
+proportion of features in full feature set: 1.0
+proportion of features in binding feature set: 0.0
+proportion of features in dragon feature set: 1.0
+proportion of features in drug_miner feature set: 0.0
+proportion of features in pocket feature set: 0.0

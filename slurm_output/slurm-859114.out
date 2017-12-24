@@ -1,0 +1,18 @@
+convert_csv_to_h5.py:67: FutureWarning: convert_objects is deprecated.  Use the data-type specific converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  save_to_hdf5(pd.read_csv(args.i, keep_default_na=False, nrows=100,na_values=np.nan).convert_objects(convert_numeric=True), args.o)
+  0%|          | 0/1 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "pandas/_libs/src/inference.pyx", line 1021, in pandas._libs.lib.maybe_convert_numeric (pandas/_libs/lib.c:56156)
+ValueError: Unable to parse string "na"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "convert_csv_to_h5.py", line 67, in <module>
+    save_to_hdf5(pd.read_csv(args.i, keep_default_na=False, nrows=100,na_values=np.nan).convert_objects(convert_numeric=True), args.o)
+  File "convert_csv_to_h5.py", line 54, in save_to_hdf5
+    output_file['train/'+str(group_name)+"/"+str(feature)] = np.asarray(pd.to_numeric(grp_data.iloc[train_idxs][feature]),dtype=np.float16)
+  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/pandas/core/tools/numeric.py", line 126, in to_numeric
+    coerce_numeric=coerce_numeric)
+  File "pandas/_libs/src/inference.pyx", line 1052, in pandas._libs.lib.maybe_convert_numeric (pandas/_libs/lib.c:56638)
+ValueError: Unable to parse string "na" at position 0

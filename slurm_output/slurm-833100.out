@@ -1,16 +1,0 @@
-  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 63.72it/s] 54%|█████▍    | 14/26 [00:00<00:00, 64.66it/s] 81%|████████  | 21/26 [00:00<00:00, 64.55it/s]100%|██████████| 26/26 [00:00<00:00, 62.75it/s]
-Number of features before removing nulls 11
-
-Number of features after removing 188 nulls 11
-|full_features| =  11
-loading 26 proteins.
-
-  0%|          | 0/26 [00:00<?, ?it/s] 35%|███▍      | 9/26 [00:00<00:00, 85.58it/s] 77%|███████▋  | 20/26 [00:00<00:00, 89.11it/s]100%|██████████| 26/26 [00:00<00:00, 91.53it/s]features_to_keep.shape =  (5, 1)
-|full_features| =  5
-loading 26 proteins.
-
-  0%|          | 0/26 [00:00<?, ?it/s] 54%|█████▍    | 14/26 [00:00<00:00, 132.73it/s] 96%|█████████▌| 25/26 [00:00<00:00, 116.53it/s]100%|██████████| 26/26 [00:00<00:00, 108.57it/s]features_to_keep.shape =  (2, 1)
-|full_features| =  2
-loading 26 proteins.
-
-features_to_keep.shape =  (1, 1)

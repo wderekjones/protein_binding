@@ -1,26 +1,0 @@
-  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 64.60it/s] 54%|█████▍    | 14/26 [00:00<00:00, 65.08it/s] 81%|████████  | 21/26 [00:00<00:00, 64.88it/s]100%|██████████| 26/26 [00:00<00:00, 62.84it/s]
-Number of features before removing nulls 11
-
-Number of features after removing 188 nulls 11
-loading 26 proteins.
-
-  0%|          | 0/26 [00:00<?, ?it/s]
-features_to_keep.shape =  (5, 1)
-loading 26 proteins.
-Traceback (most recent call last):
-  File "feature_selection.py", line 178, in <module>
-    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
-  File "feature_selection.py", line 97, in run_iterative_forest_selection
-    X, y = load_data(data_path, features_list=full_features)
-  File "/scratch/wdjo224/protein_binding/utils/input_pipeline.py", line 21, in load_data
-    features_list=features_list, mode=mode, conformation=conformation)
-  File "/scratch/wdjo224/protein_binding/utils/input_pipeline.py", line 66, in load_protein
-    data = np.asarray(input_fo[str(protein_name)][str(dataset)], dtype=np.float32)[sample]
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2846)
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2804)
-  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/h5py/_hl/group.py", line 169, in __getitem__
-    oid = h5o.open(self.id, self._e(name), lapl=self._lapl)
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2846)
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/_objects.c:2804)
-  File "h5py/h5o.pyx", line 190, in h5py.h5o.open (/home/ilan/minonda/conda-bld/h5py_1496889914775/work/h5py/h5o.c:3740)
-KeyError: "Unable to open object (Object '0' doesn't exist)"

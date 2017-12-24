@@ -1,0 +1,4 @@
+convert_csv_to_h5.py:67: FutureWarning: convert_objects is deprecated.  Use the data-type specific converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  save_to_hdf5(pd.read_csv(args.i, keep_default_na=False, nrows=100,na_values=[np.nan, 'na']).convert_objects(convert_numeric=True), args.o)
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:09<00:00,  9.97s/it]
+data/diverse/parser_output/diverse_subset.csv converted to .h5 in 10.45 seconds.

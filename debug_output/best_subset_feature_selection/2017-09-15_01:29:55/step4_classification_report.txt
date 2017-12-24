@@ -1,0 +1,8 @@
+Step 4 classification report
+
+             precision    recall  f1-score   support
+
+        0.0       0.99      0.82      0.89     70497
+        1.0       0.10      0.74      0.17      1861
+
+avg / total       0.97      0.81      0.88     72358

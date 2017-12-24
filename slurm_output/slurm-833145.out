@@ -1,20 +1,0 @@
-  0%|          | 0/26 [00:00<?, ?it/s] 27%|██▋       | 7/26 [00:00<00:00, 65.23it/s] 46%|████▌     | 12/26 [00:00<00:00, 59.69it/s] 62%|██████▏   | 16/26 [00:00<00:00, 47.09it/s] 77%|███████▋  | 20/26 [00:00<00:00, 38.66it/s] 92%|█████████▏| 24/26 [00:00<00:00, 35.75it/s]100%|██████████| 26/26 [00:00<00:00, 37.92it/s]
-Number of features before removing nulls 11
-
-Number of features after removing 188 nulls 11
-|full_features| =  11
-loading 26 proteins.
-
-features_to_keep.shape =  (5, 1)
-Traceback (most recent call last):
-  File "feature_selection.py", line 180, in <module>
-    best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
-  File "feature_selection.py", line 154, in run_iterative_forest_selection
-    sns.countplot(x="feature_class", data=feature_histogram)
-  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/seaborn/categorical.py", line 3340, in countplot
-    errcolor, errwidth, capsize, dodge)
-  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/seaborn/categorical.py", line 1587, in __init__
-    self.establish_colors(color, palette, saturation)
-  File "/home/wdjo224/miniconda3/envs/protein_binding/lib/python3.6/site-packages/seaborn/categorical.py", line 306, in establish_colors
-    l = min(light_vals) * .6
-ValueError: min() arg is an empty sequence

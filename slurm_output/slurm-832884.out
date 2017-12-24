@@ -1,16 +1,0 @@
-  0%|          | 0/26 [00:00<?, ?it/s]  4%|▍         | 1/26 [00:00<00:08,  2.84it/s]  8%|▊         | 2/26 [00:00<00:09,  2.60it/s] 12%|█▏        | 3/26 [00:01<00:08,  2.83it/s] 15%|█▌        | 4/26 [00:01<00:08,  2.70it/s] 19%|█▉        | 5/26 [00:01<00:08,  2.56it/s] 23%|██▎       | 6/26 [00:02<00:07,  2.74it/s] 27%|██▋       | 7/26 [00:02<00:06,  2.85it/s] 31%|███       | 8/26 [00:03<00:06,  2.60it/s] 35%|███▍      | 9/26 [00:03<00:05,  2.86it/s] 38%|███▊      | 10/26 [00:03<00:05,  2.87it/s] 42%|████▏     | 11/26 [00:03<00:04,  3.61it/s] 46%|████▌     | 12/26 [00:04<00:04,  3.27it/s] 50%|█████     | 13/26 [00:04<00:05,  2.59it/s] 54%|█████▍    | 14/26 [00:05<00:04,  2.76it/s] 58%|█████▊    | 15/26 [00:05<00:03,  2.98it/s] 62%|██████▏   | 16/26 [00:05<00:03,  3.22it/s] 65%|██████▌   | 17/26 [00:05<00:02,  3.60it/s] 69%|██████▉   | 18/26 [00:06<00:02,  3.37it/s] 73%|███████▎  | 19/26 [00:06<00:02,  3.07it/s] 77%|███████▋  | 20/26 [00:06<00:01,  3.01it/s] 81%|████████  | 21/26 [00:07<00:01,  2.90it/s] 85%|████████▍ | 22/26 [00:07<00:01,  3.06it/s] 88%|████████▊ | 23/26 [00:07<00:00,  3.30it/s] 92%|█████████▏| 24/26 [00:08<00:00,  3.13it/s] 96%|█████████▌| 25/26 [00:08<00:00,  3.22it/s]100%|██████████| 26/26 [00:08<00:00,  3.33it/s]
-Number of features before removing nulls 11
-
-Number of features after removing 188 nulls 11
-|full_features| =  11
-loading 26 proteins.
-
-features_to_keep.shape =  (5, 1)
-Traceback (most recent call last):
-  File "feature_selection.py", line 178, in <module>
-    run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
-  File "feature_selection.py", line 136, in run_iterative_forest_selection
-    output_directory+"step" + str(step) + "_feature_importances", support)
-  File "/scratch/wdjo224/protein_binding/utils/experiment.py", line 228, in plot_feature_importance_curve
-    ax1.fill_between(indices, sorted_importances, benchmark, where=benchmark > sorted_importances, facecolor='green', interpolate=True)
-NameError: name 'ax1' is not defined

@@ -1,0 +1,4 @@
+  File "convert_csv_to_h5.py", line 54
+    output_file['train/'+str(group_name)+"/"+str(feature)] = np.asarray(pd.to_numeric(grp_data.iloc[train_idxs][feature]),dtype=np.float16))
+                                                                                                                                           ^
+SyntaxError: invalid syntax

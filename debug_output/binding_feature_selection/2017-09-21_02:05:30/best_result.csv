@@ -1,0 +1,12 @@
+,0
+0,avg_gauss1
+1,avg_gauss2
+2,avg_repulsion
+3,avg_hydrophobic
+4,avg_hydrogen
+5,Model1.gauss1
+6,Model1.gauss2
+7,Model1.repulsion
+8,Model1.hydrophobic
+9,Model1.hydrogen
+10,vina_score
