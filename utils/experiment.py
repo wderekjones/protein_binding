@@ -7,52 +7,14 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 plt.style.use("seaborn-muted")
-from utils.input_pipeline import load_data
-from sklearn.metrics import classification_report, roc_auc_score, roc_curve, confusion_matrix, f1_score, precision_score, recall_score
+from sklearn.metrics import classification_report, roc_auc_score, roc_curve, confusion_matrix, f1_score
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.dummy import DummyClassifier
-
-plt.rc('font', family='serif', serif='Times')
-#plt.rc('text', usetex=True)
-plt.rc('xtick', labelsize=8)
-plt.rc('ytick', labelsize=8)
-plt.rc('axes', labelsize=8)
-
-
-def variance_thresholding(data_path, write_to_file=False, output_file_name=None):
-    input_fo = h5py.File(data_path, "r")
-    full_features = list(input_fo.keys())
-    X, _ = load_data_h5(data_path)
-    features_dict = {}
-
-    i = 0
-    for feature in full_features:
-        features_dict[i] = feature
-        i += 1
-
-    feat_select = VarianceThreshold(threshold=1.0)
-    feat_select.fit(X)
-    full_idxs = np.arange(0, X.shape[1])
-    feat_select_idxs = full_idxs[feat_select.get_support()]
-
-    return_feats = list(str(features_dict[i]) for i in feat_select_idxs)
-    if write_to_file:
-        if output_file_name is not None:
-            output_file = open(output_file_name, "w")
-            for output_feat in return_feats:
-                output_file.write(str(output_feat) + "\n")
-            output_file.close()
-        else:
-            output_file = open(data_path + str("_selected_features.txt"), "w")
-            for output_feat in return_feats:
-                output_file.write(str(output_feat), "\n")
-            output_file.close()
-
-    return return_feats
+from utils.input_pipeline import load_data
 
 
 def get_feature_list(data_path):
@@ -243,7 +205,7 @@ def plot_feature_importance_curve(plot_title, plot_path, feature_support):
     plt.close()
 
 
-def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label):
+def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label, roc_score):
     plt.clf()
     plt.figure(figsize=[12, 8])
     plt.plot(clf_fpr, clf_tpr, lw=2, color='g', label=clf_label)
@@ -252,7 +214,7 @@ def plot_roc_curve(plot_title, plot_path, clf_fpr, clf_tpr, clf_label):
 
     plt.xlabel("FPR")
     plt.ylabel("TPR")
-    plt.title(plot_title)
+    plt.title(plot_title+": ROC = "+str(roc_score))
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.tight_layout()

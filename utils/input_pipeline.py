@@ -6,76 +6,171 @@ from tqdm import tqdm
 from sklearn.preprocessing import Imputer, Normalizer
 
 
-def load_data(data_path, label=None, protein_name_list=None, sample_size=None, features_list=None, mode=None, conformation=None):
+def load_data(data_path, split=None, label=None, protein_name_list=None, sample_size=None, features_list=None, mode=None):
+
     input_fo = h5py.File(data_path, 'r')
 
-    X = np.ndarray([], dtype=np.float32)
-    y = np.ndarray([], dtype=np.object)
-    i = 0
+    if split is not None:
+        if split not in ["train", "test"]:
+            print ("invalid split option")
+            return None
+        else:
+            pass
+    # if split is None:
+    #     print("must supply a split")
+    #     return None
+
+    # X = np.ndarray([], dtype=np.float32)
+    # y = np.ndarray([], dtype=np.int8)
+
+    data_frame = pd.DataFrame()
 
     if protein_name_list is None:
-        protein_name_list = list(input_fo.keys())
+        protein_name_list = list(input_fo[split].keys())
     print("loading", len(protein_name_list), "proteins.")
-    for protein_name in tqdm(protein_name_list):
-        x_, y_ = load_protein(data_path, label=label, protein_name=protein_name, sample_size=sample_size,
-                              features_list=features_list, mode=mode, conformation=conformation)
-        if i == 0:
-            X = x_.astype(np.float32)
-            y = y_.astype(np.object)
-        else:
-            X = np.vstack((X, x_.astype(np.float32)))
-            y = np.vstack((y, y_.astype(np.object)))
-        i += 1
+    if split is not None:
+        for i, protein_name in enumerate(tqdm(protein_name_list)):
+            protein_df = load_split_protein(data_path, label=label, protein_name=protein_name, split=split,
+                                  sample_size=sample_size,
+                                  features_list=features_list, mode=mode)
+            data_frame = pd.concat([data_frame, protein_df])
+        #     if i == 0:
+        #         X = x_
+        #         y = y_
+        #     else:
+        #         X = np.vstack((X, x_))
+        #         y = np.vstack((y, y_))
+        #
+        # return X, y
+    else:
 
-    return X, y
+        for i, protein_name in enumerate(tqdm(protein_name_list)):
+            protein_df = load_protein(data_path, label=label, protein_name=protein_name, sample_size=sample_size,
+                              features_list=features_list, mode=mode)
+            data_frame = pd.concat([data_frame, protein_df])
 
+            # if i == 0:
+            #     X = x_
+            #     y = y_
+            # else:
+            #     X = np.vstack((X, x_))
+            #     y = np.vstack((y, y_))
 
-def load_protein(data_path, label=None, protein_name=None, sample_size=None, features_list=None, mode=None, conformation=None):
+    # return X, y
+    return data_frame
+
+def load_protein(data_path, label=None, protein_name=None, sample_size=None, features_list=None, mode=None):
     input_fo = h5py.File(data_path, 'r')
     if label is None:
         label = "label"
     # if features_list is none then use all of the features
     if features_list is None:
         features_list = list(input_fo[str(protein_name)].keys())
-        if label in features_list:
-            features_list.remove(label)
-        if "receptor" in features_list:
-            features_list.remove("receptor")
-        if "drugID" in features_list:
-            features_list.remove("drugID")
-        if "label" in features_list:
-            features_list.remove("label")
+
+    else:
+        if "receptor" not in features_list:
+            features_list.append("receptor")
+        if "drugID" not in features_list:
+            features_list.append("drugID")
+        if "label" not in features_list:
+            features_list.append("label")
 
         # in order to determine indices, select all of the labels and conformations, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
-    full_labels = np.asarray(input_fo[str(protein_name)][label]).flatten()
-    full_idxs = np.arange(0, full_labels.shape[0], 1)
+    # full_labels = np.asarray(input_fo[str(protein_name)][label]).flatten()
+    # full_idxs = np.arange(0, full_labels.shape[0], 1)
 
     mode_idxs = []
-    if mode is not None:
-        mode_idxs = full_idxs[full_labels[:, ] == mode]
-    else:
-        mode_idxs = full_idxs
+    # if mode is not None:
+    #     mode_idxs = full_idxs[full_labels[:, ] == mode]
+    # else:
+    #     mode_idxs = full_idxs
 
-    full_idxs = np.intersect1d(mode_idxs, full_idxs)
+    # full_idxs = np.intersect1d(mode_idxs, full_idxs)
 
     # if sample size is none then select all of the indices
-    if sample_size is None or sample_size > len(full_idxs):
-        sample_size = len(full_idxs)
+    # if sample_size is None or sample_size > len(full_idxs):
+    #     sample_size = len(full_idxs)
 
-    sample = np.sort(np.random.choice(full_idxs, sample_size, replace=False))
+    # sample = np.sort(np.random.choice(full_idxs, sample_size, replace=False))
 
     # get the data and store in numpy array
-    data_array = np.zeros([sample_size, len(features_list)])
-    i = 0
+    # data_array = np.zeros([sample_size, len(features_list)],dtype=np.float32)
 
-    for dataset in features_list:
-        data = np.asarray(input_fo[str(protein_name)][str(dataset)], dtype=np.float32)[sample]
-        data_array[:, i] = data[:, 0]
-        i += 1
+    # for idx, dataset in enumerate(features_list):
+    #     data = np.asarray(input_fo[str(protein_name)][str(dataset)], dtype=np.float32)[sample]
+    #     data_array[:, idx] = data[:, 0]
 
-    label_array = np.asarray(input_fo[str(protein_name)][label])[sample]
+    # label_array = np.asarray(input_fo[str(protein_name)][label])[sample]
 
-    return data_array.astype(np.float32), label_array.astype(np.object)
+    data_frame = pd.DataFrame()
+
+    for idx, feature in enumerate(features_list):
+        # data_array[:,idx] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])[sample]
+        data_frame[feature] = np.ravel(input_fo[str(protein_name)+"/"+str(feature)])
+    # label_array = np.array(input_fo[str(split)+"/"+str(protein_name)+"/"+str(label)],dtype=np.int8)[sample]
+
+    # return data_array.astype(np.float32), label_array.astype(np.int8)
+    return data_frame
+
+
+
+def load_split_protein(data_path, split=None, label=None, protein_name=None, sample_size=None, features_list=None, mode=None):
+    if split is not None:
+        if split not in ["train", "test"]:
+            print ("caught exception")
+            return None
+        else:
+            pass
+    if split is None:
+        print("must supply a split")
+        return None
+    input_fo = h5py.File(data_path, 'r')
+
+    # check if user specified a feature to use as a label
+    # if label is None:
+        # if not just use binding label
+        # label = "label"
+    # if features_list is none then use all of the features
+    if features_list is None:
+        features_list = list(input_fo[split][str(protein_name)].keys())
+
+    else:
+        if "receptor" not in features_list:
+            features_list.append("receptor")
+        if "drugID" not in features_list:
+            features_list.append("drugID")
+        if "label" not in features_list:
+            features_list.append("label")
+        # in order to determine indices, select all of the labels, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
+    # full_labels = np.asarray(input_fo[split][str(protein_name)][label]).flatten()
+    # full_idxs = np.arange(0, full_labels.shape[0], 1)
+
+    # mode_idxs = []
+    # if mode is not None:
+    #     mode_idxs = full_idxs[full_labels[:, ] == mode]
+    # else:
+    #     mode_idxs = full_idxs
+
+    # full_idxs = np.intersect1d(mode_idxs, full_idxs)
+
+    # if sample size is none then select all of the indices
+    # if sample_size is None or sample_size > len(full_idxs):
+    #     sample_size = len(full_idxs)
+
+    # sample = np.sort(np.random.choice(full_idxs, sample_size, replace=False))
+
+    # get the data and store in numpy array
+    # data_array = np.zeros([sample_size, len(features_list)],dtype=np.float32)
+    data_frame = pd.DataFrame()
+
+    for idx, feature in enumerate(features_list):
+        # data_array[:,idx] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])[sample]
+        data_frame[feature] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])
+    # label_array = np.array(input_fo[str(split)+"/"+str(protein_name)+"/"+str(label)],dtype=np.int8)[sample]
+
+    # return data_array.astype(np.float32), label_array.astype(np.int8)
+    return data_frame
+
 
 
 def generate_held_out_set(data_path,protein_name_list=None, features_list=None,mode=None,sample_size=None):
@@ -115,7 +210,7 @@ def read_feature_list(feature_path):
     return feature_list
 
 
-def output_feature_summary(output_path, full_feature_path, subset_feature_path):
+def output_feature_summary(output_path, full_feature_path, subset_feature_path, feature_list_root_path="/u/vul-d1/scratch/wdjo224/data/"):
     output_file = open(output_path, mode='w+')
     print("feature file: "+str(subset_feature_path),file=output_file)
 
@@ -126,19 +221,19 @@ def output_feature_summary(output_path, full_feature_path, subset_feature_path):
     print("proportion of features in full feature set: "+str(compute_proportion(list(feature_subset[0]),list(full_features[0]))),file=output_file)
 
     # compute the number of features from the subset that belong to the binding group
-    binding_features = pd.read_csv("data/all_kinase/with_pocket/binding_features_list.csv", header=None)
+    binding_features = pd.read_csv(feature_list_root_path+"binding_features_list.csv", header=None)
     print("proportion of features in binding feature set: "+str(compute_proportion(list(feature_subset[0]),list(binding_features[0]))),file=output_file)
 
     # compute the number of features from the subset that belong to the drug group
-    dragon_features = pd.read_csv("data/all_kinase/with_pocket/drug_features_list.csv", header=None)
+    dragon_features = pd.read_csv(feature_list_root_path+"drug_features_list.csv", header=None)
     print("proportion of features in dragon feature set: "+str(compute_proportion(list(feature_subset[0]), list(dragon_features[0]))),file=output_file)
 
     # compute the number of features from the subset that belong to the protein group
-    drugminer_features = pd.read_csv("data/all_kinase/with_pocket/protein_features_list.csv", header=None)
+    drugminer_features = pd.read_csv(feature_list_root_path+"protein_features_list.csv", header=None)
     print("proportion of features in drug_miner feature set: "+str(compute_proportion(list(feature_subset[0]), list(drugminer_features[0]))),file=output_file)
 
     # compute the number of features from the subset that belong to the binding pocket group
-    prank_features = pd.read_csv("data/all_kinase/with_pocket/pocket_features_list.csv", header=None)
+    prank_features = pd.read_csv(feature_list_root_path+"pocket_features_list.csv", header=None)
     print("proportion of features in pocket feature set: "+str(compute_proportion(list(feature_subset[0]), list(prank_features[0]))),file=output_file)
 
 

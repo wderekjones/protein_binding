@@ -1,56 +1,40 @@
-import time
 import argparse
-import h5py
 import os
 import arrow
-import itertools
 from utils.input_pipeline import output_feature_summary
-from sklearn.metrics import confusion_matrix
 import pandas as pd
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 plt.style.use("seaborn-muted")
 import seaborn as sns
-from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
-from scipy.stats import uniform
-from scipy.stats.distributions import uniform_gen
 from scipy.stats import randint as sp_randint
-from utils.input_pipeline import load_data, read_feature_list, get_feature_histogram
+from utils.input_pipeline import get_feature_histogram
 from utils.experiment import *
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import Imputer, Normalizer
+from sklearn.preprocessing import Imputer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, f1_score, classification_report, precision_recall_fscore_support
-
-# TODO: fix plotting to look less terrible and instead, ready for publication....http://www.jesshamrick.com/2016/04/13/reproducible-plots/
-# TODO: try standardizing the data
-# TODO: find a better way to give unique names to each of the output directories for the feature selection loop
-# TODO: run this algorithm on each of the subsets of features, then combine these features and run feature selection on that final set
-# TODO: move as many function definitions to the utils.experiment module as possible to avoid redundancy and keep the script short
-# TODO: output optimal hyperparameters
-# TODO: implement dummy classifier to generate biased/random predictions
-
-# Reminder: compare performance  on each feature set with and without imputation versus dropping all null features
+from sklearn.metrics import precision_recall_fscore_support
 
 parser = argparse.ArgumentParser(description="iterative feature selection script")
 
-parser.add_argument("--f", type=str, help="path(s) to set of initial features")
-parser.add_argument("--data", type=str, help="path to initial dataset, this should at least contain the features specified by --f if given")
-parser.add_argument("--null", type=str, help="path to null features")
-parser.add_argument("--strat", type=str, help="imputation strategy used to fill in the null values")
-parser.add_argument("--label",type=str,help="optional specify target label")
-parser.add_argument("--out", type=str, help="output path to dir")
-parser.add_argument("--prot", type=str, help="a flag that indicates that protein names are used as labels")
+parser.add_argument("-f", type=str, help="path(s) to set of initial features")
+parser.add_argument("-data", type=str, help="path to initial dataset, this should at least contain the features specified by --f if given")
+parser.add_argument("-null", type=str, help="path to null features")
+parser.add_argument("-strat", type=str, help="imputation strategy used to fill in the null values")
+parser.add_argument("-label",type=str,help="optional specify target label")
+parser.add_argument("-out", type=str, help="output path to dir")
+parser.add_argument("-prot", type=str, help="a flag that indicates that protein names are used as labels")
+parser.add_argument("-names", type=str,nargs='+', help="list of proteins to exclude from training", default=None)
+parser.add_argument("-root", type=str, help="root path for data and feature lists")
 args = parser.parse_args()
 
-random_state = np.random.RandomState(0)
-
+random_state = 0
 current_output_directory = arrow.now().format('YYYY-MM-DD_HH:mm:ss')
-def run_iterative_forest_selection(feature_path, output_directory=None, null_path=None, undersampled=None, prot_features=None):
+
+
+def run_iterative_forest_selection(feature_path, output_directory=None, null_path=None, undersampled=None):
     if output_directory is None:
         output_directory = current_output_directory
     else:
@@ -96,46 +80,49 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
         full_features.to_csv(output_directory + "step" + str(step) + ".csv", index=False, header=False)
 
         # Load the data
-        X, y = load_data(data_path, features_list=list(full_features[0]), label=args.label)
+        data = load_data(data_path, protein_name_list=args.names, features_list=list(full_features[0]), label=args.label)
+        print("Step {}: training using {} features.".format(step,full_features.shape[0]))
 
-        # if argument for null columns passed, then impute the data using the strategy provided via the strat argument
-        if args.null is not None:
-            X = Imputer(strategy=args.strat).fit_transform(X)
 
-        if prot_features is not None:
-            X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y,
-                                    stratify=y, test_size=0.2, shuffle=True, random_state=random_state)
-        else:
-            X_train, X_test, y_train, y_test = train_test_split(X.astype(np.float32), y.astype(np.float32),
-                                stratify=y.astype(np.float32), test_size=0.2, shuffle=True, random_state=random_state)
+        X_train, X_test, y_train, y_test = train_test_split(data, data["label"].as_matrix(),
+                        stratify=data["label"].as_matrix(), test_size=0.2, shuffle=True, random_state=random_state)
+
+        X_train[["receptor","drugID","label"]].to_csv(output_directory+"/step "+str(step)+"_training_compounds.csv",index=False)
+        X_train = X_train[X_train.columns.difference(["receptor", "drugID", "label"])]
+
+        X_test[["receptor","drugID","label"]].to_csv(output_directory+"/step "+str(step)+"_testing_compounds.csv",index=False)
+        X_test = X_test[X_test.columns.difference(["receptor", "drugID", "label"])]
+
 
         # Instantiate and train the model. Optimize hyperparameters by sampling from integer distributions
-        rforest = RandomForestClassifier(n_jobs=12, oob_score=True, class_weight='balanced', bootstrap=True,
+        rforest = RandomForestClassifier(n_jobs=-1, oob_score=True, class_weight='balanced', bootstrap=True,
                                          criterion='gini', random_state=random_state)
+        imputer = Imputer(strategy=args.strat)
 
         # find the optimal setting of parameters that maximizes the weighted f1 measure, using 100 samples of
         # 3-fold cross validation. Then select the best forest and predict on the testing set.
         forest_estimator = RandomizedSearchCV(rforest, forest_params, cv=3, scoring='f1_weighted', n_jobs=5, random_state=random_state)
-        forest_estimator.fit(X_train, y_train.flatten())
+        forest_estimator.fit(imputer.fit_transform(X_train.as_matrix()), y_train.flatten())
         best_forest = forest_estimator.best_estimator_
-        best_forest_preds = best_forest.predict(X_test)
+        best_forest_preds = best_forest.predict(imputer.fit_transform(X_test))
 
+        #TODO: export the predictions..add these as a column in the X_test dataframe?
 
         # extract the feature importances, visualize, and then save them as the set of features for the next iteration
         support = best_forest.feature_importances_
 
-        if prot_features is None:
-            # compute the false positive and true positive rates for the positive class (confusing)
-            best_forest_fpr, best_forest_tpr, _ = roc_curve(y_test, best_forest.predict_proba(X_test)[:, 1])
 
-            # plot the ROC curves of the set of features that the forest was trained upon
-            plot_roc_curve("Step " + str(step) + " ROC", output_directory + "step" + str(step) + "_roc", best_forest_fpr,
-                       best_forest_tpr, clf_label="Random Forest")
+        # compute the false positive and true positive rates for the positive class (confusing)
+        best_forest_fpr, best_forest_tpr, _ = roc_curve(y_test, best_forest.predict_proba(imputer.fit_transform(X_test))[:,1])
 
-            # compute and plot the confusion matrices for the set of features that the forest was trained upon
-            rforest_confusion = confusion_matrix(y_test, best_forest_preds)
-            plot_confusion_matrix(cm=rforest_confusion, classes=[0, 1], plot_title="Random Forest Step "+str(step)+" Confusion",
-                              plot_path=output_directory+"step"+str(step)+"_confusion.png")
+        # plot the ROC curves of the set of features that the forest was trained upon
+        plot_roc_curve("Step " + str(step) + " ROC", output_directory + "step" + str(step) + "_roc", best_forest_fpr,
+                       best_forest_tpr, clf_label="Random Forest", roc_score=roc_auc_score(y_test,best_forest.predict_proba(imputer.fit_transform(X_test))[:,1]))
+
+        # compute and plot the confusion matrices for the set of features that the forest was trained upon
+        rforest_confusion = confusion_matrix(y_test, best_forest_preds)
+        plot_confusion_matrix(cm=rforest_confusion, classes=[0, 1], plot_title="Random Forest Step "+str(step)+" Confusion",
+                            plot_path=output_directory+"step"+str(step)+"_confusion.png")
 
         # compute the importances of the features that the forest was trained upon
         plot_feature_importance_curve("Step " + str(step) + " feature importances",
@@ -146,55 +133,47 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
                                           str(step)+"_classification_report.txt", y_test, best_forest_preds)
 
         # output a breakdown of feature proportions per class.
-        output_feature_summary(output_directory+"step"+str(step)+"feature_summary.txt", "data/all_kinase/with_pocket/full_kinase_set_features_list.csv",
+        output_feature_summary(output_directory+"step"+str(step)+"feature_summary.txt", args.root+"/full_kinase_set_features_list.csv",
                                output_directory+"step"+str(step)+".csv")
 
-        feature_histogram = get_feature_histogram(list(full_features[0]), protein_feature_path="data/all_kinase/with_pocket/protein_features_list.csv",
-                              pocket_feature_path="data/all_kinase/with_pocket/pocket_features_list.csv",
-                              drug_feature_path="data/all_kinase/with_pocket/drug_features_list.csv",
-                              binding_feature_path="data/all_kinase/with_pocket/binding_features_list.csv")
+        feature_histogram = get_feature_histogram(list(full_features[0]), protein_feature_path=args.root+"/protein_features_list.csv",
+                              pocket_feature_path=args.root+"/pocket_features_list.csv",
+                              drug_feature_path=args.root+"/drug_features_list.csv",
+                              binding_feature_path=args.root+"/binding_features_list.csv")
 
         # TODO: Normalize the values in the histogram
         sns.countplot(x="feature_class", data=feature_histogram)
 
         plt.savefig(output_directory+"step"+str(step)+"_countplot.png")
 
-        #compute the precision, recall, and fscore of the predicitions extract the values for the undersampled class,
-        # in this case the positive class
+        #compute the precision, recall, and fscore of the predicitions extract the values for the undersampled class
         precision,recall,fscore = 0,0,0
         if undersampled is not None:
             precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds,
                                                                            labels=[undersampled])
         else:
-            precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds, average='micro')
+            precision, recall, fscore, _ = precision_recall_fscore_support(y_test.flatten(), best_forest_preds, average='macro')
 
         keep_idxs = support > np.mean(support, axis=0)
         features_to_keep = pd.DataFrame(np.asarray(list(full_features[0]))[keep_idxs])
-        if len(features_to_keep.values) < 1:
-            break
+
 
         if len(support) > 0:
             # find the mean of the precision, recall, and fscore. Divide this by the number of features, compare
             # to the largest value computed so far
             #if (np.sum([precision, recall, fscore])/3)/(len(support)) > best_metric_sum:
             # so incorporating the magnitude of the feature set results in a selection that is much too aggressive
-            # SO just look at the weighted average of the metrics (change made at 2:15am friday)
             if np.sum([precision, recall, fscore])/3 >= best_metric_sum:
                 best_metric_sum = np.sum([precision, recall, fscore])/3
                 best_features_to_keep = full_features
 
         step += 1
-
+        print("Step {}:  Precision: {} \t Recall: {} \t F1: {}".format(step, precision, recall, fscore))
+        print("Step {}:  Reduced from {} to {} features".format(step, full_features.shape[0], features_to_keep.shape[0]))
         full_features = features_to_keep
 
     return best_features_to_keep
 
-#best_feature_set = set()
-#for i in range(10):
-if args.prot is not None:
-    best_features = run_iterative_forest_selection(args.f, args.out, args.null, prot_features=1)
-else:
-    best_features = run_iterative_forest_selection(args.f, args.out, args.null, undersampled=1)
 
-#    best_feature_set.union(set(best_features[0]))
+best_features = run_iterative_forest_selection(args.f, args.out, args.null)
 best_features.to_csv(args.out+current_output_directory+"/best_result.csv")
