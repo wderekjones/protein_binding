@@ -28,6 +28,7 @@ parser.add_argument("-out", type=str, help="output path to dir")
 parser.add_argument("-prot", type=str, help="a flag that indicates that protein names are used as labels")
 parser.add_argument("-names", type=str,nargs='+', help="list of proteins to exclude from training", default=None)
 parser.add_argument("-root", type=str, help="root path for data and feature lists")
+parser.add_argument("--split", type=str, help="if using dataset with seperate train/test splits, specify the split", default=None)
 args = parser.parse_args()
 
 random_state = 0
@@ -80,7 +81,7 @@ def run_iterative_forest_selection(feature_path, output_directory=None, null_pat
         full_features.to_csv(output_directory + "step" + str(step) + ".csv", index=False, header=False)
 
         # Load the data
-        data = load_data(data_path, protein_name_list=args.names, features_list=list(full_features[0]), label=args.label)
+        data = load_data(data_path, protein_name_list=args.names, features_list=list(full_features[0]), label=args.label, split=args.split)
         print("Step {}: training using {} features.".format(step,full_features.shape[0]))
 
 

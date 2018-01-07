@@ -42,4 +42,5 @@ where:
         -prot: a flag that indicates that protein names are used as labels
         -names: list of proteins to exclude from training
         -root: root path for data and feature lists
+        --split: if using dataset with seperate train/test splits, specify the split"
 
