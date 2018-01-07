@@ -16,12 +16,7 @@ def load_data(data_path, split=None, label=None, protein_name_list=None, sample_
             return None
         else:
             pass
-    # if split is None:
-    #     print("must supply a split")
-    #     return None
 
-    # X = np.ndarray([], dtype=np.float32)
-    # y = np.ndarray([], dtype=np.int8)
 
     data_frame = pd.DataFrame()
 
@@ -34,14 +29,7 @@ def load_data(data_path, split=None, label=None, protein_name_list=None, sample_
                                   sample_size=sample_size,
                                   features_list=features_list, mode=mode)
             data_frame = pd.concat([data_frame, protein_df])
-        #     if i == 0:
-        #         X = x_
-        #         y = y_
-        #     else:
-        #         X = np.vstack((X, x_))
-        #         y = np.vstack((y, y_))
-        #
-        # return X, y
+
     else:
 
         for i, protein_name in enumerate(tqdm(protein_name_list)):
@@ -49,14 +37,6 @@ def load_data(data_path, split=None, label=None, protein_name_list=None, sample_
                               features_list=features_list, mode=mode)
             data_frame = pd.concat([data_frame, protein_df])
 
-            # if i == 0:
-            #     X = x_
-            #     y = y_
-            # else:
-            #     X = np.vstack((X, x_))
-            #     y = np.vstack((y, y_))
-
-    # return X, y
     return data_frame
 
 def load_protein(data_path, label=None, protein_name=None, sample_size=None, features_list=None, mode=None):
@@ -75,41 +55,11 @@ def load_protein(data_path, label=None, protein_name=None, sample_size=None, fea
         if "label" not in features_list:
             features_list.append("label")
 
-        # in order to determine indices, select all of the labels and conformations, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
-    # full_labels = np.asarray(input_fo[str(protein_name)][label]).flatten()
-    # full_idxs = np.arange(0, full_labels.shape[0], 1)
-
-    mode_idxs = []
-    # if mode is not None:
-    #     mode_idxs = full_idxs[full_labels[:, ] == mode]
-    # else:
-    #     mode_idxs = full_idxs
-
-    # full_idxs = np.intersect1d(mode_idxs, full_idxs)
-
-    # if sample size is none then select all of the indices
-    # if sample_size is None or sample_size > len(full_idxs):
-    #     sample_size = len(full_idxs)
-
-    # sample = np.sort(np.random.choice(full_idxs, sample_size, replace=False))
-
-    # get the data and store in numpy array
-    # data_array = np.zeros([sample_size, len(features_list)],dtype=np.float32)
-
-    # for idx, dataset in enumerate(features_list):
-    #     data = np.asarray(input_fo[str(protein_name)][str(dataset)], dtype=np.float32)[sample]
-    #     data_array[:, idx] = data[:, 0]
-
-    # label_array = np.asarray(input_fo[str(protein_name)][label])[sample]
-
     data_frame = pd.DataFrame()
 
     for idx, feature in enumerate(features_list):
-        # data_array[:,idx] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])[sample]
         data_frame[feature] = np.ravel(input_fo[str(protein_name)+"/"+str(feature)])
-    # label_array = np.array(input_fo[str(split)+"/"+str(protein_name)+"/"+str(label)],dtype=np.int8)[sample]
 
-    # return data_array.astype(np.float32), label_array.astype(np.int8)
     return data_frame
 
 
@@ -126,11 +76,6 @@ def load_split_protein(data_path, split=None, label=None, protein_name=None, sam
         return None
     input_fo = h5py.File(data_path, 'r')
 
-    # check if user specified a feature to use as a label
-    # if label is None:
-        # if not just use binding label
-        # label = "label"
-    # if features_list is none then use all of the features
     if features_list is None:
         features_list = list(input_fo[split][str(protein_name)].keys())
 
@@ -141,34 +86,12 @@ def load_split_protein(data_path, split=None, label=None, protein_name=None, sam
             features_list.append("drugID")
         if "label" not in features_list:
             features_list.append("label")
-        # in order to determine indices, select all of the labels, then seperately choose based on specifiedconditions, then find the intersection of the two sets.
-    # full_labels = np.asarray(input_fo[split][str(protein_name)][label]).flatten()
-    # full_idxs = np.arange(0, full_labels.shape[0], 1)
 
-    # mode_idxs = []
-    # if mode is not None:
-    #     mode_idxs = full_idxs[full_labels[:, ] == mode]
-    # else:
-    #     mode_idxs = full_idxs
-
-    # full_idxs = np.intersect1d(mode_idxs, full_idxs)
-
-    # if sample size is none then select all of the indices
-    # if sample_size is None or sample_size > len(full_idxs):
-    #     sample_size = len(full_idxs)
-
-    # sample = np.sort(np.random.choice(full_idxs, sample_size, replace=False))
-
-    # get the data and store in numpy array
-    # data_array = np.zeros([sample_size, len(features_list)],dtype=np.float32)
     data_frame = pd.DataFrame()
 
     for idx, feature in enumerate(features_list):
-        # data_array[:,idx] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])[sample]
         data_frame[feature] = np.ravel(input_fo[str(split)+"/"+str(protein_name)+"/"+str(feature)])
-    # label_array = np.array(input_fo[str(split)+"/"+str(protein_name)+"/"+str(label)],dtype=np.int8)[sample]
 
-    # return data_array.astype(np.float32), label_array.astype(np.int8)
     return data_frame
 
 
