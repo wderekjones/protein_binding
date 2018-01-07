@@ -1,14 +1,13 @@
 # protein_binding
 
-This repository contains the implementation of "Towards Protein-Kinase Invariant Models for Drug Discovery" by Jones, de Jong, Ellingson.
-The readme will be updated once things have been finalized!
+This repository contains the implementation of "Polypharmacology Within the Full Kinome: a Machine Learning Approach".
 ## Parser
 A script that collects various features from multiple input files and outputs a file of protein, drug, protein-drug pair features as specified by the user. 
 
 
 In order to run the parser:
 
-> python parser.py --p paths/to/protein_features --m /path/to/molec_descriptors --pm paths/to/protein/molec/features --feats /path/to/molec_features_list
+> python full_parser.py --p paths/to/protein_features --m /path/to/molec_descriptors --pm paths/to/protein/molec/features --feats /path/to/molec_features_list
 
 where:
 
@@ -25,6 +24,22 @@ example:
 	
 Note: this script has been verified to run with python 3.6.1
 
-## Results
-Finishing the code soon!
+---
+## Feature Selection
+
+To run the random forest feature selection: 
+
+> python feature_selection.py -f -data -null -strat -label -out -prot -names -root
+
+where:
+
+        -f: path(s) to set of initial features
+        -data: path to initial dataset, this should at least contain the features specified by --f if given
+        -null: path to null features
+        -strat: imputation strategy used to fill in the null values
+        -label: optional specify target label
+        -out: output path to dir
+        -prot: a flag that indicates that protein names are used as labels
+        -names: list of proteins to exclude from training
+        -root: root path for data and feature lists
 
